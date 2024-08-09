@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Remove if fonts are not used */
+@import '~@fontsource/inter/100.css';
+@import '~@fontsource/inter/200.css';
+@import '~@fontsource/inter/300.css';
+@import '~@fontsource/inter/400.css';
+@import '~@fontsource/inter/500.css';
+@import '~@fontsource/inter/600.css';
+@import '~@fontsource/inter/700.css';
+@import '~@fontsource/inter/800.css';
+@import '~@fontsource/inter/900.css';
+@import '~@fontsource/roboto-mono/300.css';
+@import '~@fontsource/roboto-mono/400.css';
+@import '~@fontsource/plus-jakarta-sans/600.css';
+@import '~@fontsource/plus-jakarta-sans/700.css';
+
+/* Variables */
+:root {
+  --icon-fontSize-sm: 1rem;
+  --icon-fontSize-md: 1.25rem;
+  --icon-fontSize-lg: 1.5rem;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--mui-palette-primary-main);
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+}
+
+.add-cus .mui-hz1bth-MuiDialog-container{
+  justify-content: end !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  color: #222;
+  font-weight: 600;
+  font-family: Poppins, sans-serif;
+  transition: all 0.3s ease-in-out;
+}
+
+h1 {
+  font-size: calc((1.8 - 1) * 1.2vw + 1rem) !important;
+  line-height: calc(1.4 * (1 + (1 - 4) / 25));
+  margin: 0.5rem 0;
+}
+
+h2 {
+  font-size: calc((1.7 - 1) * 1.2vw + 0.8rem) !important;
+  line-height: calc(1.4 * (1 + (1 - 2.5) / 25));
+  margin: 0.5rem 0;
+}
+h3,
+.font-size-cont {
+  font-size: calc((1.555 - 1) * 1.2vw + 0.8rem) !important;
+  line-height: calc(1.4 * (1 + (1 - 2) / 25));
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  margin: 0.2rem 0;
+}
+h4 {
+  font-size: calc((1.2 - 1) * 1.2vw + 0.8rem) !important;
+  line-height: calc(1.4 * (1 + (1 - 2) / 25));
+  margin: 0.5rem 0;
+}
+
+h5 {
+  font-size: calc((1 - 1) * 1.2vw + 0.8rem) !important;
+  line-height: calc(1.4 * (1 + (1 - 2) / 25));
+  margin: 0.5rem 0;
+}
+
+h6 {
+  font-size: calc((0.8 - 1) * 1.2vw + 0.8rem) !important;
+  line-height: calc(1.4 * (1 + (1 - 2) / 25));
+  margin: 0.5rem 0;
+}
+
+p {
+  font-size: 16px;
+  color: #3d3d3d;
+  line-height: calc(1.4 * (1 + (1 - 2.5) / 25));
+  margin: 0 0 15px 0;
+  font-family: "Poppins", sans-serif;
+  font-weight: 300;
+  font-size: 14px !important;
+}
+
+.custom-phone-input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  outline: none; /* Remove focus outline */
+  box-shadow: none; /* Remove focus shadow */
+}
+
+.login-page .mui-7d7xpv{
+  background: #2ac5ff;
+  padding: 0px;
+}
+.login-img-cont{
+background:#0d293c;   
+  text-align:center;
+  max-width:200px;
+  padding:35px 20px 35px;
+  border-radius:100px;
+  margin: auto auto;
+}
