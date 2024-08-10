@@ -35,9 +35,7 @@ import {
 } from "lib/redux/constants/branch_actionTypes";
 
 const schema = z.object({
-  phone: z
-    .string()
-    .regex(/^\+?[0-9]{10,13}$/, { message: "Invalid phone number" }),
+  link: z.string().min(1, { message: "Whatsapp link is required" }),
   branch: z.string().min(1, { message: "Branch is required" }),
 });
 
@@ -60,7 +58,7 @@ export const Edit_branch = ({ open, setOpen, isvisible }) => {
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      phone: "",
+      link: "",
       branch: "",
     },
   });
@@ -88,11 +86,11 @@ export const Edit_branch = ({ open, setOpen, isvisible }) => {
     }
 
     if (!isvisible) {
-      setValue("phone", "");
+      setValue("link", "");
       setValue("branch", "");
     }
     if (branch_details) {
-      setValue("phone", branch_details.phone_number || "");
+      setValue("link", branch_details.link || "");
       setValue(
         "branch",
         branch_details.branch === null
@@ -153,15 +151,15 @@ export const Edit_branch = ({ open, setOpen, isvisible }) => {
                 <Stack spacing={2}>
                   <Controller
                     control={control}
-                    name="phone"
+                    name="link"
                     // disabled={true}
                     render={({ field }) => (
                       <FormControl
                         sx={{ marginTop: "13px" }}
-                        error={Boolean(errors.phone)}
+                        error={Boolean(errors.link)}
                       >
                         <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
-                          Branch Phone Number
+                          Whatsapp Link
                         </InputLabel>
                         <OutlinedInput
                           disabled={isvisible}
@@ -169,12 +167,12 @@ export const Edit_branch = ({ open, setOpen, isvisible }) => {
                             style: { padding: "10px", fontSize: "12px" },
                           }}
                           {...field}
-                          label="Branch Phone Number"
-                          type="phone"
+                          label="Whatsapp Link"
+                          type="link"
                         />
-                        {errors.phone && (
+                        {errors.link && (
                           <FormHelperText>
-                            {errors.phone.message}
+                            {errors.link.message}
                           </FormHelperText>
                         )}
                       </FormControl>

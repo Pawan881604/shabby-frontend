@@ -48,7 +48,7 @@ export const Edit_customer = ({ open, setOpen }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const { loading: branch_loading, branch } = useSelector(
-    (state) => state.branch,
+    (state) => state.branch
   );
   const dispatch = useDispatch();
   const {
@@ -91,7 +91,7 @@ export const Edit_customer = ({ open, setOpen }) => {
       setValue("phone", user_details.phone_number || "");
       setValue(
         "branch",
-        user_details.branch === null ? "Not set" : user_details.branch || "",
+        user_details.branch === null ? "Not set" : user_details.branch || ""
       );
       setValue("authorize", user_details.authorize || "");
       setValue("role", user_details.role || "");
@@ -179,7 +179,7 @@ export const Edit_customer = ({ open, setOpen }) => {
                   control={control}
                   name="branch"
                   render={({ field }) => (
-                    <FormControl style={{ marginTop: "10px", width: "100%" }}>
+                    <FormControl style={{ marginTop: "16px", width: "100%" }}>
                       <Autocomplete
                         disablePortal
                         className="cont-input-field"
@@ -187,7 +187,7 @@ export const Edit_customer = ({ open, setOpen }) => {
                         getOptionLabel={(option) => option.name}
                         value={
                           branches.find(
-                            (branch) => branch.id === field.value,
+                            (branch) => branch.id === field.value
                           ) || null
                         } // Ensure correct option is selected
                         onChange={(event, newValue) => {
@@ -196,10 +196,17 @@ export const Edit_customer = ({ open, setOpen }) => {
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            sx={{
-                              "& .MuiInputBase-root": {
-                                padding: "4px 4px",
-                                fontSize: "14px",
+                            InputLabelProps={{
+                              style: {
+                                top: "-4px",
+                                fontSize: "14px", // Set font size for the label text
+                              },
+                            }}
+                            inputProps={{
+                              ...params.inputProps,
+                              style: {
+                                padding: "4px 4px", // Adjust padding as needed
+                                fontSize: "12px", // Ensure the font size matches the above for consistency
                               },
                             }}
                             label="Branch"

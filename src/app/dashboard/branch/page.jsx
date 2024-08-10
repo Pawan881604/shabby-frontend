@@ -50,8 +50,8 @@ const Page = () => {
 
   const columns = [
     {
-      field: "phone",
-      headerName: "Phone",
+      field: "link",
+      headerName: "Whatsapp Link",
       flex: 1,
     },
     {
@@ -89,7 +89,7 @@ const Page = () => {
     branch.forEach((item, i) => {
       rows.push({
         id: item.branch_id,
-        phone: item.phone_number,
+        link: item.link,
         branch: item.branch,
         // no_users: item.branch,
         status: item.status,

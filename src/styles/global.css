@@ -119,3 +119,6 @@ background:#0d293c;
   border-radius:100px;
   margin: auto auto;
 }
+.over-n-cus .MuiDataGrid-footerContainer{
+  display:none !important;
+}

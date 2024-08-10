@@ -13,6 +13,7 @@ import { paths } from '../../../paths';
 import { isNavItemActive } from '../../../lib/is-nav-item-active';
 import { navItems } from './config';
 import { navIcons } from './nav-icons';
+import Link from 'next/link';
 
 export function SideNav() {
   const pathname = usePathname();
@@ -46,12 +47,20 @@ export function SideNav() {
       }}
     >
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
-          {/* <Logo color="light" height={32} width={122} /> */}
-          <Typography>
-            Logo
-          </Typography>
+       
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+
+      <Link href={'/dashboard'}>
+      <Box
+              component="img"
+              alt="Widgets"
+              src="/assets/shabby.png"
+              sx={{ height: 'auto', width: '100%', maxWidth: '100px' }}
+            />
+            </Link>
         </Box>
+          <Box />
+       
         <Box
           sx={{
             alignItems: 'center',

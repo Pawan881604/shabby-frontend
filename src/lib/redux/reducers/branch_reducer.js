@@ -37,21 +37,23 @@ export const branch_reducer = (
       return {
         ...state,
         loading: false,
-        branch: action.payload,
+        branch: action.payload.branch,
+        count_branch: action.payload.count_branch,
+        resultPerpage: action.payload.resultPerpage,
       };
     case UPDATE_BRANCH_DETAILS_SUCCESS:
       return {
         ...state,
         loading: false,
         update: true,
-        branch: action.payload,
+        branch: action.payload.branch,
       };
     case ADD_BRANCH_DETAILS_SUCCESS:
       return {
         ...state,
         loading: false,
         success: true,
-        branch: action.payload,
+        branch: action.payload.branch,
       };
     case FETCH_BRANCH_DETAILS_SUCCESS:
       return {

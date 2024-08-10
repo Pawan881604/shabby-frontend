@@ -37,7 +37,7 @@ export default function Layout({ children }) {
       >
         <SideNav />
         <Box sx={{ display: 'flex', flex: '1 1 auto', flexDirection: 'column', pl: { lg: 'var(--SideNav-width)' } }}>
-          <MainNav />
+          <MainNav custom={true}/>
           <main>
             <Container maxWidth="xl" sx={{ py: '64px' }}>
               {children}

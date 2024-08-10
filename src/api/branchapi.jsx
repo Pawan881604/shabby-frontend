@@ -57,7 +57,7 @@ export const get_all_branch = () => async (dispatch) => {
       `${getSiteURL()}api/v1/branch`,
       get_method(),
     );
-    dispatch({ type: FETCH_BRANCH_SUCCESS, payload: data.branch });
+    dispatch({ type: FETCH_BRANCH_SUCCESS, payload: data });
   } catch (error) {
     dispatch({ type: FETCH_BRANCH_FAILURE, error: axios_error(error) });
   }

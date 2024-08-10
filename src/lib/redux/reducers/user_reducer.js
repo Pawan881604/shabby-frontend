@@ -30,7 +30,9 @@ export const userReducer = (state = { user: [], user_details: {} }, action) => {
       return {
         ...state,
         loading: false,
-        user: action.payload,
+        user: action.payload.users,
+        count_users: action.payload.count_users,
+        resultPerpage: action.payload.resultPerpage,
       };
     case UPDATE_USER_DETAILS_SUCCESS:
       return {

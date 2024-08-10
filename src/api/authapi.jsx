@@ -43,7 +43,7 @@ export const get_all_users = () => async (dispatch) => {
       get_method(),
     );
 
-    dispatch({ type: FETCH_USER_SUCCESS, payload: data.users });
+    dispatch({ type: FETCH_USER_SUCCESS, payload: data });
   } catch (error) {
     dispatch({ type: FETCH_USER_FAILURE, error: axios_error(error) });
   }

@@ -7,13 +7,15 @@ import Typography from '@mui/material/Typography';
 import { ArrowDown as ArrowDownIcon } from '@phosphor-icons/react/dist/ssr/ArrowDown';
 import { ArrowUp as ArrowUpIcon } from '@phosphor-icons/react/dist/ssr/ArrowUp';
 import { WhatsappLogo } from '@phosphor-icons/react/dist/ssr/WhatsappLogo';
+import { useSelector } from 'react-redux';
+import Link from 'next/link';
 
-export function Branches({ diff, trend, sx, value }) {
-  const TrendIcon = trend === 'up' ? ArrowUpIcon : ArrowDownIcon;
-  const trendColor = trend === 'up' ? 'var(--mui-palette-success-main)' : 'var(--mui-palette-error-main)';
+export function Branches({ sx }) {
+  const { count_branch } = useSelector((state) => state.branch);
 
   return (
-    <Card sx={sx}>
+  <Link style={{textDecoration:'none'}} href={'/dashboard/branch'}>
+      <Card sx={sx}>
       <CardContent>
         <Stack spacing={3}>
           <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }} spacing={3}>
@@ -22,7 +24,7 @@ export function Branches({ diff, trend, sx, value }) {
                 Branches
               </Typography>
               <Typography variant="h4">
-                {value}
+                {count_branch}
               </Typography>
             </Stack>
             <Avatar sx={{ backgroundColor: 'var(--mui-palette-primary-main)', height: '56px', width: '56px' }}>
@@ -32,5 +34,6 @@ export function Branches({ diff, trend, sx, value }) {
         </Stack>
       </CardContent>
     </Card>
+  </Link>
   );
 }

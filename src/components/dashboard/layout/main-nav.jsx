@@ -15,7 +15,7 @@ import { usePopover } from "../../../hooks/use-popover";
 import { MobileNav } from "./mobile-nav";
 import { UserPopover } from "./user-popover";
 
-export function MainNav() {
+export function MainNav({custom}) {
   const [openNav, setOpenNav] = React.useState(false);
   const userPopover = usePopover();
 
@@ -79,6 +79,7 @@ export function MainNav() {
         anchorEl={userPopover.anchorRef.current}
         onClose={userPopover.handleClose}
         open={userPopover.open}
+        custom={custom}
       />
       <MobileNav onClose={() => setOpenNav(false)} open={openNav} />
     </React.Fragment>
