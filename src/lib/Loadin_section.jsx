@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, CircularProgress } from "@mui/material";
 
-export const Loadin_section = () => {
+export const Loadin_section = ({height=null}) => {
 
   return (
     <>
@@ -12,7 +12,7 @@ export const Loadin_section = () => {
             justifyContent: "center",
             width: "100%",
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            height: "400px",
+            height: height===null?'400px':'100%',
           }}
         >
           <CircularProgress />

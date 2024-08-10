@@ -13,6 +13,9 @@ export function AuthGuard({ children }) {
   const [isChecking, setIsChecking] = React.useState(true);
 
   const checkPermissions = async () => {
+    if (user && user.role !== 'admin') {
+      router.push("/nothing");
+    }
     if (isLoading) {
       return;
     }
@@ -20,9 +23,6 @@ export function AuthGuard({ children }) {
     if (error) {
       setIsChecking(false);
       return;
-    }
-    if (user && user.role !== 'admin') {
-      router.push("/dashboard/nothing");
     }
 
     if (!user) {
