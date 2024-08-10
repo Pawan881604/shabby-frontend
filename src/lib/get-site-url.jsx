@@ -4,7 +4,7 @@ export function getSiteURL() {
   process.env.NEXT_PUBLIC_VERCEL_URL ??
   // Automatically set by Vercel.
   'https://shabby-backend.vercel.app';
-  // 'http://localhost:8024';
+  // 'http://localhost:8024'
   // Make sure to include `https://` when not localhost.
   url = url.includes('http') ? url : `https://shabby-backend.vercel.app`;
   // Make sure to include a trailing `/`.
