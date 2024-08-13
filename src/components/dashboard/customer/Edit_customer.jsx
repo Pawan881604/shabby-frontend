@@ -44,7 +44,7 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_customer = ({ open, setOpen }) => {
+export const Edit_customer = ({ open, setOpen,setAlertColor, alertColor }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const { loading: branch_loading, branch } = useSelector(
@@ -84,6 +84,7 @@ export const Edit_customer = ({ open, setOpen }) => {
     dispatch(get_all_branch());
     if (error) {
       setShowAlert(true);
+      setAlertColor(false)
       setAlertMessage(error);
       dispatch(clearErrors());
     }
@@ -98,6 +99,7 @@ export const Edit_customer = ({ open, setOpen }) => {
     }
     if (update) {
       setShowAlert(true);
+      setAlertColor(true)
       setAlertMessage("User details updated successfully!");
       dispatch({ type: UPDATE_USER_DETAILS_RESET });
     }
@@ -137,7 +139,7 @@ export const Edit_customer = ({ open, setOpen }) => {
               <form onSubmit={handleSubmit(onSubmit)}>
                 {showAlert && (
                   <Alert_
-                    status={"success"}
+                    status={alertColor ? "success" : "error"}
                     setShowAlert={setShowAlert}
                     alertMessage={alertMessage}
                     showAlert={showAlert}

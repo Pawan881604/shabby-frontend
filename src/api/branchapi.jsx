@@ -9,6 +9,7 @@ import {
   FETCH_BRANCH_DETAILS_FAILURE,
   FETCH_BRANCH_DETAILS_REQUEST,
   FETCH_BRANCH_DETAILS_SUCCESS,
+  FETCH_BRANCH_ERROR,
   FETCH_BRANCH_FAILURE,
   FETCH_BRANCH_REQUEST,
   FETCH_BRANCH_SUCCESS,
@@ -28,7 +29,7 @@ export const add_branch = (branch_data, uuid) => async (dispatch) => {
 
     dispatch({ type: ADD_BRANCH_DETAILS_SUCCESS, payload: data.branch });
   } catch (error) {
-    dispatch({ type: ADD_BRANCH_DETAILS_FAILURE, error: axios_error(error) });
+    dispatch({ type: ADD_BRANCH_DETAILS_FAILURE, payload: error.response.data.message });
   }
 };
 
@@ -59,7 +60,7 @@ export const get_all_branch = () => async (dispatch) => {
     );
     dispatch({ type: FETCH_BRANCH_SUCCESS, payload: data });
   } catch (error) {
-    dispatch({ type: FETCH_BRANCH_FAILURE, error: axios_error(error) });
+    dispatch({ type: FETCH_BRANCH_FAILURE, payload: error.response.data.message });
   }
 };
 
@@ -73,6 +74,10 @@ export const get_branch_details = (branch_id) => async (dispatch) => {
 
     dispatch({ type: FETCH_BRANCH_DETAILS_SUCCESS, payload: data.branch[0] });
   } catch (error) {
-    dispatch({ type: FETCH_BRANCH_DETAILS_FAILURE, error: axios_error(error) });
+    dispatch({ type: FETCH_BRANCH_DETAILS_FAILURE, payload: error.response.data.message });
   }
+};
+
+export const clearErrors = () => async (dispatch) => {
+  dispatch({ type: FETCH_BRANCH_ERROR });
 };

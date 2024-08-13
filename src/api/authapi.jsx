@@ -45,7 +45,7 @@ export const get_all_users = () => async (dispatch) => {
 
     dispatch({ type: FETCH_USER_SUCCESS, payload: data });
   } catch (error) {
-    dispatch({ type: FETCH_USER_FAILURE, error: axios_error(error) });
+    dispatch({ type: FETCH_USER_FAILURE, payload: error.response.data.message });
   }
 };
 
@@ -60,7 +60,7 @@ export const update_user = (user_data, id) => async (dispatch) => {
 
     dispatch({ type: UPDATE_USER_DETAILS_SUCCESS, payload: data.users });
   } catch (error) {
-    dispatch({ type: UPDATE_USER_DETAILS_FAILURE, error: axios_error(error) });
+    dispatch({ type: UPDATE_USER_DETAILS_FAILURE, payload: error.response.data.message });
   }
 };
 
@@ -74,7 +74,7 @@ export const get_user_details = (user_id) => async (dispatch) => {
 
     dispatch({ type: FETCH_USER_DETAILS_SUCCESS, payload: data.users[0] });
   } catch (error) {
-    dispatch({ type: FETCH_USER_DETAILS_FAILURE, error: axios_error(error) });
+    dispatch({ type: FETCH_USER_DETAILS_FAILURE, payload: error.response.data.message });
   }
 };
 

@@ -10,11 +10,12 @@ import { Edit_branch } from "../../../components/dashboard/branch/Edit_branch";
 import { Data_grid_table } from "../../../lib/Data_grid_table.jsx";
 import { UPDATE_USER_DETAILS_RESET } from "../../../lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
-import { get_all_branch, get_branch_details } from "../../../api/branchapi";
+import { clearErrors, get_all_branch, get_branch_details } from "../../../api/branchapi";
 import { ADD_BRANCH_DETAILS_RESET, UPDATE_BRANCH_DETAILS_RESET } from "../../../lib/redux/constants/branch_actionTypes";
 
 const Page = () => {
   const [showAlert, setShowAlert] = useState(false);
+  const [alertColor, setAlertColor] = useState(true);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
   const { loading, branch, success, update, error } = useSelector(
@@ -27,6 +28,7 @@ const Page = () => {
     dispatch(get_all_branch());
     if (error) {
       setShowAlert(true);
+      setAlertColor(false)
       setAlertMessage(error);
       dispatch(clearErrors());
     }
@@ -105,7 +107,7 @@ const Page = () => {
 
   return (
     <Stack spacing={3}>
-      <Edit_branch open={open} setOpen={setOpen} isvisible={isvisible} />
+      <Edit_branch open={open} setAlertColor={setAlertColor} alertColor={alertColor} setOpen={setOpen} isvisible={isvisible} />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
           <Typography variant="h4">Branch</Typography>
@@ -125,7 +127,7 @@ const Page = () => {
         <div>
           {showAlert && (
             <Alert_
-              status={"success"}
+              status={alertColor?'success':'error'}
               setShowAlert={setShowAlert}
               alertMessage={alertMessage}
               showAlert={showAlert}

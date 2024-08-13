@@ -43,12 +43,12 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_branch = ({ open, setOpen, isvisible }) => {
+export const Edit_branch = ({ open, setOpen, isvisible,setAlertColor, alertColor }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
   const { loading_, branch_details, success, update, error } = useSelector(
-    (state) => state.branch,
+    (state) => state.branch
   );
   const {
     control,
@@ -82,6 +82,7 @@ export const Edit_branch = ({ open, setOpen, isvisible }) => {
     if (error) {
       setShowAlert(true);
       setAlertMessage(error);
+      setAlertColor(false)
       dispatch(clearErrors());
     }
 
@@ -93,18 +94,18 @@ export const Edit_branch = ({ open, setOpen, isvisible }) => {
       setValue("link", branch_details.link || "");
       setValue(
         "branch",
-        branch_details.branch === null
-          ? "Not set"
-          : branch_details.branch || "",
+        branch_details.branch === null ? "Not set" : branch_details.branch || ""
       );
     }
     if (success) {
       setShowAlert(true);
+      setAlertColor(true)
       setAlertMessage("Branch details Added successfully!");
       dispatch({ type: ADD_BRANCH_DETAILS_RESET });
     }
     if (update) {
       setShowAlert(true);
+      setAlertColor(true)
       setAlertMessage("Branch details updated successfully!");
       dispatch({ type: UPDATE_BRANCH_DETAILS_RESET });
     }
@@ -131,7 +132,7 @@ export const Edit_branch = ({ open, setOpen, isvisible }) => {
           <DialogTitle>
             <Stack spacing={1}>
               <Typography variant="h4">
-                {isvisible ? "Update" : "Add new"} Customer
+                {isvisible ? "Update" : "Add new"} Branch
               </Typography>
             </Stack>
           </DialogTitle>
@@ -142,7 +143,7 @@ export const Edit_branch = ({ open, setOpen, isvisible }) => {
               <form onSubmit={handleSubmit(onSubmit)}>
                 {showAlert && (
                   <Alert_
-                    status={"success"}
+                    status={alertColor ? "success" : "error"}
                     setShowAlert={setShowAlert}
                     alertMessage={alertMessage}
                     showAlert={showAlert}
@@ -171,9 +172,7 @@ export const Edit_branch = ({ open, setOpen, isvisible }) => {
                           type="link"
                         />
                         {errors.link && (
-                          <FormHelperText>
-                            {errors.link.message}
-                          </FormHelperText>
+                          <FormHelperText>{errors.link.message}</FormHelperText>
                         )}
                       </FormControl>
                     )}

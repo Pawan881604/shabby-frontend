@@ -13,6 +13,7 @@ import { Alert_ } from "styles/theme/alert";
 
 const Page = () => {
   const [showAlert, setShowAlert] = useState(false);
+  const [alertColor, setAlertColor] = useState(true);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
   const { loading, user, update, error } = useSelector((state) => state.users);
@@ -24,11 +25,13 @@ const Page = () => {
     dispatch(get_all_users());
     if (error) {
       setShowAlert(true);
+      setAlertColor(false)
       setAlertMessage(error);
       dispatch(clearErrors());
     }
     if (update) {
       setShowAlert(true);
+      setAlertColor(true)
       setAlertMessage("User details updated successfully!");
       dispatch({ type: UPDATE_USER_DETAILS_RESET });
     }
@@ -110,7 +113,9 @@ const Page = () => {
 
   return (
     <Stack spacing={3}>
-      <Edit_customer open={open} setOpen={setOpen} />
+      <Edit_customer alertColor={alertColor}
+      setAlertColor={setAlertColor}
+      open={open} setOpen={setOpen} />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
           <Typography variant="h4">Customers</Typography>
@@ -125,12 +130,13 @@ const Page = () => {
         </Stack>
         <div>
           {showAlert && (
-            <Alert_
-              status={"success"}
-              setShowAlert={setShowAlert}
-              alertMessage={alertMessage}
-              showAlert={showAlert}
-            />
+                 <Alert_
+                 status={alertColor ? "success" : "error"}
+                 setShowAlert={setShowAlert}
+                 alertMessage={alertMessage}
+                 showAlert={showAlert}
+               />
+            
           )}
         </div>
       </Stack>
