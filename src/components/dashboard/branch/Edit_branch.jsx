@@ -43,7 +43,13 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_branch = ({ open, setOpen, isvisible,setAlertColor, alertColor }) => {
+export const Edit_branch = ({
+  open,
+  setOpen,
+  isvisible,
+  setAlertColor,
+  alertColor,
+}) => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
@@ -82,7 +88,7 @@ export const Edit_branch = ({ open, setOpen, isvisible,setAlertColor, alertColor
     if (error) {
       setShowAlert(true);
       setAlertMessage(error);
-      setAlertColor(false)
+      setAlertColor(false);
       dispatch(clearErrors());
     }
 
@@ -99,13 +105,13 @@ export const Edit_branch = ({ open, setOpen, isvisible,setAlertColor, alertColor
     }
     if (success) {
       setShowAlert(true);
-      setAlertColor(true)
+      setAlertColor(true);
       setAlertMessage("Branch details Added successfully!");
       dispatch({ type: ADD_BRANCH_DETAILS_RESET });
     }
     if (update) {
       setShowAlert(true);
-      setAlertColor(true)
+      setAlertColor(true);
       setAlertMessage("Branch details updated successfully!");
       dispatch({ type: UPDATE_BRANCH_DETAILS_RESET });
     }
@@ -163,7 +169,6 @@ export const Edit_branch = ({ open, setOpen, isvisible,setAlertColor, alertColor
                           Whatsapp Link
                         </InputLabel>
                         <OutlinedInput
-                          disabled={isvisible}
                           inputProps={{
                             style: { padding: "10px", fontSize: "12px" },
                           }}
