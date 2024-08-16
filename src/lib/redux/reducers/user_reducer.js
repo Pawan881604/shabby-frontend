@@ -6,16 +6,19 @@ import {
   FETCH_USER_FAILURE,
   FETCH_USER_REQUEST,
   FETCH_USER_SUCCESS,
+  LOGIN_FAILURE,
+  LOGIN_REQUEST,
+  LOGIN_SUCCESS,
   UPDATE_USER_DETAILS_FAILURE,
   UPDATE_USER_DETAILS_REQUEST,
   UPDATE_USER_DETAILS_RESET,
   UPDATE_USER_DETAILS_SUCCESS,
-  
 } from "../constants/user_actionTypes";
 
 export const userReducer = (state = { user: [], user_details: {} }, action) => {
   switch (action.type) {
     case FETCH_USER_REQUEST:
+    case LOGIN_REQUEST:
     case UPDATE_USER_DETAILS_REQUEST:
       return {
         ...state,
@@ -25,6 +28,13 @@ export const userReducer = (state = { user: [], user_details: {} }, action) => {
       return {
         ...state,
         loading_: true,
+      };
+    case LOGIN_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        user_details: action.payload.users,
+        success: true,
       };
     case FETCH_USER_SUCCESS:
       return {
@@ -50,12 +60,15 @@ export const userReducer = (state = { user: [], user_details: {} }, action) => {
     case FETCH_USER_FAILURE:
     case FETCH_USER_DETAILS_FAILURE:
     case UPDATE_USER_DETAILS_FAILURE:
+    case LOGIN_FAILURE:
       return {
         ...state,
         loading: false,
         loading_: false,
         user: null,
+        user_details: null,
         update: null,
+        success: null,
         error: action.payload,
       };
     case UPDATE_USER_DETAILS_RESET:

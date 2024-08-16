@@ -1,6 +1,5 @@
 'use client';
 
-function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 import * as React from 'react';
 import RouterLink from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -20,6 +19,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
 import { paths } from '../../paths';
 import { useUser } from '../../hooks/use-user';
+
 const schema = zod.object({
   firstName: zod.string().min(1, {
     message: 'First name is required'
@@ -35,6 +35,7 @@ const schema = zod.object({
   }),
   terms: zod.boolean().refine(value => value, 'You must accept the terms and conditions')
 });
+
 const defaultValues = {
   firstName: '',
   lastName: '',
@@ -42,24 +43,23 @@ const defaultValues = {
   password: '',
   terms: false
 };
+
 export function SignUpForm() {
   const router = useRouter();
-  const {
-    checkSession
-  } = useUser();
+  const { checkSession } = useUser();
   const [isPending, setIsPending] = React.useState(false);
   const {
     control,
     handleSubmit,
     setError,
-    formState: {
-      errors
-    }
+    formState: { errors }
   } = useForm({
     defaultValues,
     resolver: zodResolver(schema)
   });
+
   const onSubmit = () => {
+    
     // async (values: Values): Promise<void> => {
     //   setIsPending(true);
 
@@ -80,84 +80,88 @@ export function SignUpForm() {
     // },
     // [checkSession, router, setError]
   };
-  return /*#__PURE__*/React.createElement(Stack, {
-    spacing: 3
-  }, /*#__PURE__*/React.createElement(Stack, {
-    spacing: 1
-  }, /*#__PURE__*/React.createElement(Typography, {
-    variant: "h4"
-  }, "Sign up"), /*#__PURE__*/React.createElement(Typography, {
-    color: "text.secondary",
-    variant: "body2"
-  }, "Already have an account?", ' ', /*#__PURE__*/React.createElement(Link, {
-    component: RouterLink,
-    href: paths.auth.signIn,
-    underline: "hover",
-    variant: "subtitle2"
-  }, "Sign in"))), /*#__PURE__*/React.createElement("form", {
-    onSubmit: handleSubmit(onSubmit)
-  }, /*#__PURE__*/React.createElement(Stack, {
-    spacing: 2
-  }, /*#__PURE__*/React.createElement(Controller, {
-    control: control,
-    name: "firstName",
-    render: ({
-      field
-    }) => /*#__PURE__*/React.createElement(FormControl, {
-      error: Boolean(errors.firstName)
-    }, /*#__PURE__*/React.createElement(InputLabel, null, "First name"), /*#__PURE__*/React.createElement(OutlinedInput, _extends({}, field, {
-      label: "First name"
-    })), errors.firstName ? /*#__PURE__*/React.createElement(FormHelperText, null, errors.firstName.message) : null)
-  }), /*#__PURE__*/React.createElement(Controller, {
-    control: control,
-    name: "lastName",
-    render: ({
-      field
-    }) => /*#__PURE__*/React.createElement(FormControl, {
-      error: Boolean(errors.firstName)
-    }, /*#__PURE__*/React.createElement(InputLabel, null, "Last name"), /*#__PURE__*/React.createElement(OutlinedInput, _extends({}, field, {
-      label: "Last name"
-    })), errors.firstName ? /*#__PURE__*/React.createElement(FormHelperText, null, errors.firstName.message) : null)
-  }), /*#__PURE__*/React.createElement(Controller, {
-    control: control,
-    name: "email",
-    render: ({
-      field
-    }) => /*#__PURE__*/React.createElement(FormControl, {
-      error: Boolean(errors.email)
-    }, /*#__PURE__*/React.createElement(InputLabel, null, "Email address"), /*#__PURE__*/React.createElement(OutlinedInput, _extends({}, field, {
-      label: "Email address",
-      type: "email"
-    })), errors.email ? /*#__PURE__*/React.createElement(FormHelperText, null, errors.email.message) : null)
-  }), /*#__PURE__*/React.createElement(Controller, {
-    control: control,
-    name: "password",
-    render: ({
-      field
-    }) => /*#__PURE__*/React.createElement(FormControl, {
-      error: Boolean(errors.password)
-    }, /*#__PURE__*/React.createElement(InputLabel, null, "Password"), /*#__PURE__*/React.createElement(OutlinedInput, _extends({}, field, {
-      label: "Password",
-      type: "password"
-    })), errors.password ? /*#__PURE__*/React.createElement(FormHelperText, null, errors.password.message) : null)
-  }), /*#__PURE__*/React.createElement(Controller, {
-    control: control,
-    name: "terms",
-    render: ({
-      field
-    }) => /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(FormControlLabel, {
-      control: /*#__PURE__*/React.createElement(Checkbox, field),
-      label: /*#__PURE__*/React.createElement(React.Fragment, null, "I have read the ", /*#__PURE__*/React.createElement(Link, null, "terms and conditions"))
-    }), errors.terms ? /*#__PURE__*/React.createElement(FormHelperText, {
-      error: true
-    }, errors.terms.message) : null)
-  }), errors.root ? /*#__PURE__*/React.createElement(Alert, {
-    color: "error"
-  }, errors.root.message) : null, /*#__PURE__*/React.createElement(Button, {
-    disabled: isPending,
-    type: "submit",
-    variant: "contained"
-  }, "Sign up"))), /*#__PURE__*/React.createElement(Alert, {
-    color: "warning"
-  }, "Created users are not persisted"));
+
+  return (
+    <Stack spacing={3}>
+      <Stack spacing={1}>
+        <Typography variant="h4">Sign up</Typography>
+        <Typography color="text.secondary" variant="body2">
+          Already have an account?{' '}
+          <Link component={RouterLink} href={paths.auth.signIn} underline="hover" variant="subtitle2">
+            Sign in
+          </Link>
+        </Typography>
+      </Stack>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Stack spacing={2}>
+          <Controller
+            control={control}
+            name="firstName"
+            render={({ field }) => (
+              <FormControl error={Boolean(errors.firstName)}>
+                <InputLabel>First name</InputLabel>
+                <OutlinedInput {...field} label="First name" />
+                {errors.firstName && <FormHelperText>{errors.firstName.message}</FormHelperText>}
+              </FormControl>
+            )}
+          />
+          <Controller
+            control={control}
+            name="lastName"
+            render={({ field }) => (
+              <FormControl error={Boolean(errors.lastName)}>
+                <InputLabel>Last name</InputLabel>
+                <OutlinedInput {...field} label="Last name" />
+                {errors.lastName && <FormHelperText>{errors.lastName.message}</FormHelperText>}
+              </FormControl>
+            )}
+          />
+          <Controller
+            control={control}
+            name="email"
+            render={({ field }) => (
+              <FormControl error={Boolean(errors.email)}>
+                <InputLabel>Email address</InputLabel>
+                <OutlinedInput {...field} label="Email address" type="email" />
+                {errors.email && <FormHelperText>{errors.email.message}</FormHelperText>}
+              </FormControl>
+            )}
+          />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field }) => (
+              <FormControl error={Boolean(errors.password)}>
+                <InputLabel>Password</InputLabel>
+                <OutlinedInput {...field} label="Password" type="password" />
+                {errors.password && <FormHelperText>{errors.password.message}</FormHelperText>}
+              </FormControl>
+            )}
+          />
+          <Controller
+            control={control}
+            name="terms"
+            render={({ field }) => (
+              <div>
+                <FormControlLabel
+                  control={<Checkbox {...field} />}
+                  label={
+                    <>
+                      I have read the <Link href="#">terms and conditions</Link>
+                    </>
+                  }
+                />
+                {errors.terms && <FormHelperText error>{errors.terms.message}</FormHelperText>}
+              </div>
+            )}
+          />
+          {errors.root && <Alert color="error">{errors.root.message}</Alert>}
+          <Button disabled={isPending} type="submit" variant="contained">
+            Sign up
+          </Button>
+        </Stack>
+      </form>
+      <Alert color="warning">Created users are not persisted</Alert>
+    </Stack>
+  );
 }

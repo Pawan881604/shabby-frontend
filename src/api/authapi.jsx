@@ -34,6 +34,25 @@ export const Auth = async (user_id, uuid) => {
   }
 };
 
+//________________________________________________________________________
+export const Login_user = async (user_id, uuid) => {
+  try {
+    const { data } = await axiosInstance.post(
+      `${getSiteURL()}api/v1/auth/login`,
+      {
+        phone_number: "+" + user_id,
+        uuid,
+      },
+      others_method(),
+    );
+    return {
+      data,
+    }; // Always return an object
+  } catch (error) {
+    return axios_error(error);
+  }
+};
+
 //_________________________________________________________________
 export const get_all_users = () => async (dispatch) => {
   try {
