@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -17,10 +16,17 @@ import {
   OutlinedInput,
   TextField,
 } from "@mui/material";
-import { get_all_users, reset_user_password } from "../../../api/authapi";
+import {
+  clearErrors,
+  get_all_users,
+  reset_user_password,
+} from "../../../api/authapi";
 import { useDispatch, useSelector } from "react-redux";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { USER_PASSWORD_RESET_RESET } from "lib/redux/constants/user_actionTypes";
+import { useEffect, useState } from "react";
+import { Alert_ } from "styles/theme/alert";
 const schema = zod.object({
   password: zod.string().min(6, {
     message: "Password should be at least 6 characters",
@@ -28,14 +34,19 @@ const schema = zod.object({
 });
 
 export function AccountDetailsForm() {
-  const dispatch = useDispatch();
-  const [email, setEmail] = React.useState("");
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertColor, setAlertColor] = useState("");
 
-  const { user } = useSelector((state) => state.users);
+  const dispatch = useDispatch();
+  const [email, setEmail] = useState("");
+
+  const { error, user, update } = useSelector((state) => state.users);
   const {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
@@ -45,11 +56,34 @@ export function AccountDetailsForm() {
     dispatch(reset_user_password(values, email));
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(get_all_users());
-  }, []);
+    if (error) {
+      setShowAlert(true);
+      setAlertColor(false);
+      setAlertMessage(error);
+      dispatch(clearErrors());
+      setError(error);
+    }
+    if (update) {
+      setShowAlert(true);
+      setAlertColor(true);
+      setValue("password", "");
+      setEmail(" ");
+      setAlertMessage("User password updated successfully!");
+      dispatch({ type: USER_PASSWORD_RESET_RESET });
+    }
+  }, [error, update]);
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+      {showAlert && (
+        <Alert_
+          status={alertColor ? "success" : "error"}
+          setShowAlert={setShowAlert}
+          alertMessage={alertMessage}
+          showAlert={showAlert}
+        />
+      )}
       <Card>
         <CardHeader
           subheader="The information can be edited"
