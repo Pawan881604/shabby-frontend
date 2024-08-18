@@ -81,6 +81,41 @@ export function SignUpForm() {
     // [checkSession, router, setError]
   };
 
+
+
+
+ // const onOtpSubmit = React.useCallback(async values => {
+  //   setIsPending(true);
+  //   const uuid = await generateUuid();
+  //   const params = {
+  //     otp: values.otp,
+  //     user_id: user_id,
+  //     uuid: uuid
+  //   };
+  //   const {
+  //     error
+  //   } = await authClient.signInWithOtp(params);
+  //   if (error) {
+  //     setOtpError('root', {
+  //       type: 'server',
+  //       message: error
+  //     });
+  //     setIsPending(false);
+  //     return;
+  //   }
+
+  //   // Refresh the auth state
+  //   await checkSession?.();
+
+  //   // UserProvider, for this case, will not refresh the router
+  //   // After refresh, GuestGuard will handle the redirect
+  //   router.refresh();
+  // }, [checkSession, router, user_id, setOtpError]);
+  // const handleResendOTP = async () => {
+  //   console.log('Resend OTP button clicked');
+  //   // Add your logic to resend the OTP here
+  // };
+
   return (
     <Stack spacing={3}>
       <Stack spacing={1}>

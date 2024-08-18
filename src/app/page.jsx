@@ -15,7 +15,7 @@ export default function Page() {
       redirect("/dashboard");
     }
     
-    redirect("/nothing")
+    redirect("/auth/sign-in")
   }, [isLoading, user]);
 
   if (isLoading) {

@@ -1,78 +1,127 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import Divider from '@mui/material/Divider';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import Select from '@mui/material/Select';
-import Grid from '@mui/material/Unstable_Grid2';
+import * as React from "react";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardActions from "@mui/material/CardActions";
+import CardContent from "@mui/material/CardContent";
+import CardHeader from "@mui/material/CardHeader";
+import Divider from "@mui/material/Divider";
+import { z as zod } from "zod";
+import {
+  Autocomplete,
+  Box,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  OutlinedInput,
+  TextField,
+} from "@mui/material";
+import { get_all_users, reset_user_password } from "../../../api/authapi";
+import { useDispatch, useSelector } from "react-redux";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+const schema = zod.object({
+  password: zod.string().min(6, {
+    message: "Password should be at least 6 characters",
+  }),
+});
 
 export function AccountDetailsForm() {
+  const dispatch = useDispatch();
+  const [email, setEmail] = React.useState("");
+
+  const { user } = useSelector((state) => state.users);
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit = (values) => {
+    dispatch(reset_user_password(values, email));
+  };
+
+  React.useEffect(() => {
+    dispatch(get_all_users());
+  }, []);
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-      }}
-    >
+    <form onSubmit={handleSubmit(onSubmit)}>
       <Card>
-        <CardHeader subheader="The information can be edited" title="Profile" />
+        <CardHeader
+          subheader="The information can be edited"
+          title="Edit user password"
+        />
         <Divider />
         <CardContent>
-          <Grid container spacing={3}>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth required>
-                <InputLabel>First name</InputLabel>
-                <OutlinedInput el="First name" name="firstName" />
+          <Box sx={{ width: "100%", mb: "15px", width: "100%" }}>
+            <Autocomplete
+              sx={{ width: "100%" }}
+              autoHighlight
+              options={user}
+              getOptionLabel={(option) => option?.email || ""} // Handle missing or undefined name
+              onChange={(event, newValue) => {
+                setEmail(newValue.email);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  InputLabelProps={{
+                    style: { fontSize: "13px", top: "-4px" },
+                  }}
+                  label="Choose branch"
+                  inputProps={{
+                    ...params.inputProps,
+                    style: {
+                      padding: "4px 4px", // Adjust padding as needed
+                      fontSize: "12px", // Ensure the font size matches the above for consistency
+                    },
+                  }}
+                />
+              )}
+            />
+          </Box>
+          <Controller
+            control={control}
+            name="password"
+            style={{ width: "100%" }}
+            render={({ field }) => (
+              <FormControl
+                error={Boolean(errors.password)}
+                style={{ width: "100%" }}
+              >
+                <InputLabel style={{ fontSize: "13px", top: "-5px" }}>
+                  Password
+                </InputLabel>
+                <OutlinedInput
+                  {...field}
+                  label="Password"
+                  type="password"
+                  inputProps={{
+                    style: {
+                      padding: "10px",
+                      fontSize: "14px",
+                      width: "100%",
+                    },
+                  }}
+                />
+                {errors.password && (
+                  <FormHelperText>{errors.password.message}</FormHelperText>
+                )}
               </FormControl>
-            </Grid>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth required>
-                <InputLabel>Last name</InputLabel>
-                <OutlinedInput label="Last name" name="lastName" />
-              </FormControl>
-            </Grid>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth required>
-                <InputLabel>Email address</InputLabel>
-                <OutlinedInput label="Email address" name="email" />
-              </FormControl>
-            </Grid>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Phone number</InputLabel>
-                <OutlinedInput label="Phone number" name="phone" type="tel" />
-              </FormControl>
-            </Grid>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>State</InputLabel>
-                <Select  label="State" name="state" variant="outlined">
-                  {/* {states.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))} */}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid md={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>City</InputLabel>
-                <OutlinedInput label="City" />
-              </FormControl>
-            </Grid>
-          </Grid>
+            )}
+          />
+
+          {errors.root && <Alert color="error">{errors.root.message}</Alert>}
         </CardContent>
         <Divider />
-        <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained">Save details</Button>
+        <CardActions sx={{ justifyContent: "flex-end" }}>
+          <Button variant="contained" type="submit">
+            Save details
+          </Button>
         </CardActions>
       </Card>
     </form>

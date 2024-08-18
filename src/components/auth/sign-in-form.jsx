@@ -45,24 +45,25 @@ export function SignInForm() {
 
   const onSubmit = React.useCallback(
     async (values) => {
-      console.log(values);
-      // const uuid = await generateUuid();
-      // const response = await Auth(values, uuid);
-      //   if (response.data) {
-      //     setuser_id(response.data.user_data);
-      //     setOpt_page(true);
-      //     return;
-      //   }
-      //   if (response.error) {
-      //     setError("root", {
-      //       type: "server",
-      //       message: response.error,
-      //     });
-      //     return;
-      //   }
-      //   router.refresh();
+      const uuid = await generateUuid();
+      const { error } = await authClient.signInWithEmail(values, uuid);
+      if (error) {
+        setError("root", {
+          type: "server",
+          message: error,
+        });
+        setIsPending(false);
+        return;
+      }
+
+      //   // Refresh the auth state
+      await checkSession?.();
+
+      //   // UserProvider, for this case, will not refresh the router
+      //   // After refresh, GuestGuard will handle the redirect
+      router.refresh();
     },
-    [router, setError]
+    [checkSession, router, setError]
   );
 
   return (

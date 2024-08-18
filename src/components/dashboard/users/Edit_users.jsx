@@ -4,12 +4,13 @@ import {
   FormControl,
   FormHelperText,
   InputLabel,
-  MenuItem,
   OutlinedInput,
-  Select,
   Typography,
-  TextField,
   Alert,
+  Autocomplete,
+  TextField,
+  Paper,
+  Chip,
 } from "@mui/material";
 import {
   Button,
@@ -24,39 +25,38 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
-import { forwardRef, useEffect, useState } from "react";
-import { clearErrors, update_user } from "api/authapi";
+import { forwardRef, useEffect, useMemo, useState } from "react";
+import { ADD_user, clearErrors } from "../../../api/authapi";
+import { ADD_USER_RESET, UPDATE_USER_DETAILS_RESET } from "../../../lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
-import { add_branch, update_branch } from "../../../api/branchapi";
+import { get_all_branch } from "../../../api/branchapi";
 import generateUuid from "../../../lib/Uuidv4";
-
-import {
-  ADD_BRANCH_DETAILS_RESET,
-  UPDATE_BRANCH_DETAILS_RESET,
-} from "lib/redux/constants/branch_actionTypes";
-
 const schema = z.object({
-  link: z.string().min(1, { message: "Whatsapp link is required" }),
-  branch: z.string().min(1, { message: "Branch is required" }),
+  email: z
+    .string()
+    .min(1, {
+      message: "Email is required",
+    })
+    .email(),
+  password: z.string().min(6, {
+    message: "Password should be at least 6 characters",
+  }),
 });
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_branch = ({
-  open,
-  setOpen,
-  isvisible,
-  setAlertColor,
-  alertColor,
-}) => {
+export const Edit_users = ({ open, setOpen, setAlertColor, alertColor }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
-  const { loading_, branch_details, success, update, error } = useSelector(
-    (state) => state.branch
-  );
+  const {
+    loading_: user_details_loading,
+   success,
+    error,
+  } = useSelector((state) => state.users);
+
   const {
     control,
     handleSubmit,
@@ -65,58 +65,39 @@ export const Edit_branch = ({
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      link: "",
-      branch: "",
+      email: "",
+      password: "",
     },
   });
+
   const handleClose = () => {
     setOpen(false);
   };
 
   const onSubmit = async (data) => {
-    if (isvisible) {
-      dispatch(update_branch(data, branch_details.branch_id));
-      handleClose();
-      return;
-    }
     const uuid = generateUuid();
-    await dispatch(add_branch(data, uuid));
-
+    dispatch(ADD_user(data,uuid));
     handleClose();
   };
 
   useEffect(() => {
+    dispatch(get_all_branch());
     if (error) {
       setShowAlert(true);
-      setAlertMessage(error);
       setAlertColor(false);
+      setAlertMessage(error);   
       dispatch(clearErrors());
     }
-
-    if (!isvisible) {
-      setValue("link", "");
-      setValue("branch", "");
-    }
-    if (branch_details) {
-      setValue("link", branch_details.link || "");
-      setValue(
-        "branch",
-        branch_details.branch === null ? "Not set" : branch_details.branch || ""
-      );
-    }
     if (success) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("Branch details Added successfully!");
-      dispatch({ type: ADD_BRANCH_DETAILS_RESET });
-    }
-    if (update) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("Branch details updated successfully!");
-      dispatch({ type: UPDATE_BRANCH_DETAILS_RESET });
-    }
-  }, [branch_details, setValue, update, dispatch, error, success, isvisible]);
+        setShowAlert(true);
+        setAlertColor(true);
+        setValue("email", "");
+        setValue("password", "");
+        setAlertMessage("User add successfully!");
+        dispatch({ type: ADD_USER_RESET });
+      }
+
+  }, [ setValue, success, dispatch, error]);
 
   return (
     <>
@@ -138,13 +119,11 @@ export const Edit_branch = ({
         >
           <DialogTitle>
             <Stack spacing={1}>
-              <Typography variant="h4">
-                {isvisible ? "Update" : "Add new"} Branch
-              </Typography>
+              <Typography variant="h4">Add new User</Typography>
             </Stack>
           </DialogTitle>
           <DialogContent>
-            {loading_ ? (
+            {user_details_loading ? (
               <Loadin_section />
             ) : (
               <form onSubmit={handleSubmit(onSubmit)}>
@@ -159,55 +138,54 @@ export const Edit_branch = ({
                 <Stack spacing={2}>
                   <Controller
                     control={control}
-                    name="link"
-                    // disabled={true}
+                    name="email"
                     render={({ field }) => (
                       <FormControl
                         sx={{ marginTop: "13px" }}
-                        error={Boolean(errors.link)}
+                        error={Boolean(errors.email)}
                       >
                         <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
-                          Whatsapp Link
+                          Email id
                         </InputLabel>
                         <OutlinedInput
                           inputProps={{
                             style: { padding: "10px", fontSize: "12px" },
                           }}
                           {...field}
-                          label="Whatsapp Link"
-                          type="link"
+                          label="Email id"
+                          type="email"
                         />
-                        {errors.link && (
-                          <FormHelperText>{errors.link.message}</FormHelperText>
+                        {errors.email && (
+                          <FormHelperText>
+                            {errors.email.message}
+                          </FormHelperText>
                         )}
                       </FormControl>
                     )}
                   />
-                </Stack>
-                <Stack spacing={2}>
                   <Controller
                     control={control}
-                    name="branch"
+                    name="password"
                     // disabled={true}
                     render={({ field }) => (
                       <FormControl
                         sx={{ marginTop: "13px" }}
-                        error={Boolean(errors.branch)}
+                        error={Boolean(errors.password)}
                       >
                         <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
-                          Branch Name
+                          password
                         </InputLabel>
                         <OutlinedInput
                           inputProps={{
                             style: { padding: "10px", fontSize: "12px" },
                           }}
                           {...field}
-                          label="Branch name"
-                          type="branch"
+                          label="Password"
+                          type="password"
                         />
-                        {errors.branch && (
+                        {errors.password && (
                           <FormHelperText>
-                            {errors.branch.message}
+                            {errors.password.message}
                           </FormHelperText>
                         )}
                       </FormControl>

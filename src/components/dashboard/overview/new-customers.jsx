@@ -88,14 +88,17 @@ export function NewCustomers({ sx }) {
   const rows = [];
   if (Array.isArray(user)) {
     user.slice(0,8).forEach((item, i) => {
-      rows.push({
-        id: item.user_id,
-        phone: item.phone_number,
-        branch: item.branch === null ? "Not set" : item.branch,
-        authorize: item.authorize,
-        role: item.role,
-        status: item.status,
-      });
+      if(item.role==='user'){
+
+        rows.push({
+          id: item.user_id,
+          phone: item.phone_number,
+          branch: item.branch === null ? "Not set" : item.branch,
+          authorize: item.authorize,
+          role: item.role,
+          status: item.status,
+        });
+      }
     });
   }
 

@@ -7,10 +7,11 @@ export const paths = {
   },
   dashboard: {
     overview: '/dashboard',
-    account: '/dashboard/account',
+    users: '/dashboard/users',
     customers: '/dashboard/customers',
     branch: '/dashboard/branch',
-    settings: '/dashboard/settings'
+    settings: '/dashboard/settings',
+    account: '/dashboard/account'
   },
   errors: {
     notFound: '/errors/not-found'

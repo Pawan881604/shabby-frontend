@@ -13,6 +13,12 @@ import {
   UPDATE_USER_DETAILS_REQUEST,
   UPDATE_USER_DETAILS_SUCCESS,
   FETCH_USER_ERROR,
+  ADD_USER_FAILURE,
+  ADD_USER_REQUEST,
+  ADD_USER_SUCCESS,
+  USER_PASSWORD_RESET_REQUEST,
+  USER_PASSWORD_RESET_SUCCESS,
+  USER_PASSWORD_RESET_FAILURE,
 } from "../lib/redux/constants/user_actionTypes";
 
 //________________________________________________________________________
@@ -24,7 +30,7 @@ export const Auth = async (user_id, uuid) => {
         phone_number: "+" + user_id,
         uuid,
       },
-      others_method(),
+      others_method()
     );
     return {
       data,
@@ -35,19 +41,18 @@ export const Auth = async (user_id, uuid) => {
 };
 
 //________________________________________________________________________
-export const Login_user = async (user_id, uuid) => {
+export const Login_user = async (email, password, uuid) => {
   try {
-    const { data } = await axiosInstance.post(
+    const response = await axiosInstance.post(
       `${getSiteURL()}api/v1/auth/login`,
       {
-        phone_number: "+" + user_id,
+        email,
+        password,
         uuid,
       },
-      others_method(),
+      others_method()
     );
-    return {
-      data,
-    }; // Always return an object
+    return response.data;
   } catch (error) {
     return axios_error(error);
   }
@@ -59,27 +64,71 @@ export const get_all_users = () => async (dispatch) => {
     dispatch({ type: FETCH_USER_REQUEST });
     const { data } = await axiosInstance.get(
       `${getSiteURL()}api/v1/auth/all-users`,
-      get_method(),
+      get_method()
     );
 
     dispatch({ type: FETCH_USER_SUCCESS, payload: data });
   } catch (error) {
-    dispatch({ type: FETCH_USER_FAILURE, payload: error.response.data.message });
+    dispatch({
+      type: FETCH_USER_FAILURE,
+      payload: error.response.data.message,
+    });
   }
 };
 
-export const update_user = (user_data, id) => async (dispatch) => {
+export const update_user = (user_data, branches, id) => async (dispatch) => {
   try {
+    const jsonBranches = JSON.stringify(branches);
+
     dispatch({ type: UPDATE_USER_DETAILS_REQUEST });
     const { data } = await axiosInstance.put(
       `${getSiteURL()}api/v1/auth/action-user/${id}`,
-      { user_data },
-      others_method(),
+      { user_data, branches: jsonBranches },
+      others_method()
     );
 
     dispatch({ type: UPDATE_USER_DETAILS_SUCCESS, payload: data.users });
   } catch (error) {
-    dispatch({ type: UPDATE_USER_DETAILS_FAILURE, payload: error.response.data.message });
+    dispatch({
+      type: UPDATE_USER_DETAILS_FAILURE,
+      payload: error.response.data.message,
+    });
+  }
+};
+
+export const reset_user_password = (user_data, email) => async (dispatch) => {
+  try {
+    const { password } = user_data;
+    dispatch({ type: USER_PASSWORD_RESET_REQUEST });
+    const { data } = await axiosInstance.put(
+      `${getSiteURL()}api/v1/auth/edit-admin-user`,
+      { email, password },
+      others_method()
+    );
+
+    dispatch({ type: USER_PASSWORD_RESET_SUCCESS, payload: data.users });
+  } catch (error) {
+    dispatch({
+      type: USER_PASSWORD_RESET_FAILURE,
+      payload: error.response.data.message,
+    });
+  }
+};
+
+export const ADD_user = (user_data, uuid) => async (dispatch) => {
+  try {
+    const { email, password } = user_data;
+    dispatch({ type: ADD_USER_REQUEST });
+    const { data } = await axiosInstance.post(
+      `${getSiteURL()}api/v1/auth/edit-admin-user`,
+      { email, password, uuid },
+      others_method()
+    );
+
+    dispatch({ type: ADD_USER_SUCCESS, payload: data.users });
+  } catch (error) {
+    console.log(error);
+    dispatch({ type: ADD_USER_FAILURE, payload: error.response.data.message });
   }
 };
 
@@ -88,12 +137,15 @@ export const get_user_details = (user_id) => async (dispatch) => {
     dispatch({ type: FETCH_USER_DETAILS_REQUEST });
     const { data } = await axiosInstance.get(
       `${getSiteURL()}api/v1/auth/all-users?user_id=${user_id}`,
-      get_method(),
+      get_method()
     );
 
     dispatch({ type: FETCH_USER_DETAILS_SUCCESS, payload: data.users[0] });
   } catch (error) {
-    dispatch({ type: FETCH_USER_DETAILS_FAILURE, payload: error.response.data.message });
+    dispatch({
+      type: FETCH_USER_DETAILS_FAILURE,
+      payload: error.response.data.message,
+    });
   }
 };
 
@@ -107,7 +159,7 @@ export const Otp_auth = async (otp, user_id, uuid) => {
         user_id,
         uuid,
       },
-      others_method(),
+      others_method()
     );
     return response.data; // Always return an object
   } catch (error) {

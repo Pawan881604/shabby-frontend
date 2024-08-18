@@ -10,7 +10,7 @@ import {
   get_all_users,
   get_user_details,
 } from "../../../api/authapi";
-import { Edit_customer } from "../../../components/dashboard/customer/Edit_customer";
+import { Edit_users } from "../../../components/dashboard/users/Edit_users";
 import { Data_grid_table } from "../../../lib/Data_grid_table.jsx";
 import { UPDATE_USER_DETAILS_RESET } from "lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
@@ -20,7 +20,7 @@ const Page = () => {
   const [alertColor, setAlertColor] = useState(true);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
-  const { loading, user, update, error } = useSelector((state) => state.users);
+  const { loading, user, success, error } = useSelector((state) => state.users);
   const { branch } = useSelector((state) => state.branch);
 
   const [open, setOpen] = useState(false);
@@ -33,13 +33,13 @@ const Page = () => {
       setAlertMessage(error);
       dispatch(clearErrors());
     }
-    if (update) {
+    if (success) {
       setShowAlert(true);
       setAlertColor(true);
-      setAlertMessage("User details updated successfully!");
+      setAlertMessage("User add successfully!");
       dispatch({ type: UPDATE_USER_DETAILS_RESET });
     }
-  }, [dispatch, update, error]);
+  }, [dispatch, success, error]);
 
   const get_single_user = async (user_id) => {
     await dispatch(get_user_details(user_id));
@@ -48,8 +48,8 @@ const Page = () => {
 
   const columns = [
     {
-      field: "phone",
-      headerName: "Phone",
+      field: "email",
+      headerName: "email",
       flex: 1,
     },
     {
@@ -64,7 +64,9 @@ const Page = () => {
         return (
           <div>
             {branchItems.length > 0
-              ? branchItems.map((item, i) => <span key={i}>{item.branch},</span>)
+              ? branchItems.map((item, i) => (
+                  <span key={i}>{item.branch},</span>
+                ))
               : "Branch Not Set"}
           </div>
         );
@@ -90,29 +92,29 @@ const Page = () => {
       flex: 1,
       // renderCell: (params) => <TimeAgo time={params.value} />,
     },
-    {
-      field: "action",
-      headerName: "Action",
-      type: "number",
-      flex: 1,
-      shortable: false,
-      renderCell: (params) => {
-        return (
-          <>
-            <Button onClick={() => get_single_user(params.row.id)}>Edit</Button>
-          </>
-        );
-      },
-    },
+    // {
+    //   field: "action",
+    //   headerName: "Action",
+    //   type: "number",
+    //   flex: 1,
+    //   shortable: false,
+    //   renderCell: (params) => {
+    //     return (
+    //       <>
+    //         <Button onClick={() => get_single_user(params.row.id)}>Edit</Button>
+    //       </>
+    //     );
+    //   },
+    // },
   ];
 
   const rows = [];
   if (Array.isArray(user)) {
     user.forEach((item, i) => {
-      if(item.role==='user'){
+      if (item.role === "admin") {
         rows.push({
           id: item.user_id,
-          phone: item.phone_number,
+          email: item.email,
           branch: item.branch === null ? "Not set" : item.branch,
           authorize: item.authorize,
           role: item.role,
@@ -124,7 +126,7 @@ const Page = () => {
 
   return (
     <Stack spacing={3}>
-      <Edit_customer
+      <Edit_users
         alertColor={alertColor}
         setAlertColor={setAlertColor}
         open={open}
@@ -132,15 +134,19 @@ const Page = () => {
       />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
-          <Typography variant="h4">Customers</Typography>
-          {/* <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
+          <Typography variant="h4">Members</Typography>
+
+          {/*   <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+           <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
             Import
           </Button>
-          <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}>
-            Export
-          </Button>
-        </Stack> */}
+            <Button
+              color="inherit"
+            
+            >
+              Add Branch
+            </Button>
+          </Stack>*/}
         </Stack>
         <div>
           {showAlert && (
@@ -151,9 +157,15 @@ const Page = () => {
               showAlert={showAlert}
             />
           )}
+          <Button
+            startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
+            variant="contained"
+            onClick={() => setOpen(true)}
+          >
+            Add Member
+          </Button>
         </div>
       </Stack>
-      {/* <CustomersFilters />*/}
       <Data_grid_table rows={rows} columns={columns} loading={loading} />
     </Stack>
   );

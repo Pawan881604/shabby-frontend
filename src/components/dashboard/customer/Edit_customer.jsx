@@ -4,13 +4,13 @@ import {
   FormControl,
   FormHelperText,
   InputLabel,
-  MenuItem,
   OutlinedInput,
-  Select,
   Typography,
   Alert,
   Autocomplete,
   TextField,
+  Paper,
+  Chip,
 } from "@mui/material";
 import {
   Button,
@@ -25,7 +25,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import { clearErrors, update_user } from "api/authapi";
 import { UPDATE_USER_DETAILS_RESET } from "lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
@@ -35,18 +35,20 @@ const schema = z.object({
   phone: z
     .string()
     .regex(/^\+?[0-9]{10,13}$/, { message: "Invalid phone number" }),
-  branch: z.string().min(1, { message: "Branch is required" }),
-  authorize: z.string().min(1, { message: "authorize is required" }),
-  role: z.string().min(1, { message: "authorize is required" }),
+  // branch: z.string().min(1, { message: "Branch is required" }),
+  // authorize: z.string().min(1, { message: "authorize is required" }),
+  // role: z.string().min(1, { message: "authorize is required" }),
 });
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_customer = ({ open, setOpen,setAlertColor, alertColor }) => {
+export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [chipData, setChipData] = useState([]);
+
   const { loading: branch_loading, branch } = useSelector(
     (state) => state.branch
   );
@@ -66,9 +68,9 @@ export const Edit_customer = ({ open, setOpen,setAlertColor, alertColor }) => {
     resolver: zodResolver(schema),
     defaultValues: {
       phone: "",
-      branch: "",
-      authorize: "",
-      role: "",
+      // branch: "",
+      // authorize: "",
+      // role: "",
     },
   });
   const handleClose = () => {
@@ -76,15 +78,27 @@ export const Edit_customer = ({ open, setOpen,setAlertColor, alertColor }) => {
   };
 
   const onSubmit = async (data) => {
-    dispatch(update_user(data, user_details.user_id));
+    dispatch(update_user(data, chipData, user_details.user_id));
     handleClose();
+  };
+
+  const handleDelete = (ChipData) => () => {
+    setChipData((chips) => chips.filter((chip) => chip.id !== ChipData.id));
+  };
+  const branch_onchange_handler = (e, newValue) => {
+    const exists = chipData.some((item) => item.id === newValue.id);
+
+    if (!exists) {
+      // Add the newValue to chipData only if its id does not exist
+      setChipData((prev) => [newValue, ...prev]);
+    } // Add the selected value to the array
   };
 
   useEffect(() => {
     dispatch(get_all_branch());
     if (error) {
       setShowAlert(true);
-      setAlertColor(false)
+      setAlertColor(false);
       setAlertMessage(error);
       dispatch(clearErrors());
     }
@@ -94,12 +108,18 @@ export const Edit_customer = ({ open, setOpen,setAlertColor, alertColor }) => {
         "branch",
         user_details.branch === null ? "Not set" : user_details.branch || ""
       );
+
       setValue("authorize", user_details.authorize || "");
       setValue("role", user_details.role || "");
+      // if (Array.isArray(user_details.branch)) {
+      //   setChipData(() =>
+      //     user_details.branch.filter((item) => item.includes(branch.branch_id))
+      //   );
+      // }
     }
     if (update) {
       setShowAlert(true);
-      setAlertColor(true)
+      setAlertColor(true);
       setAlertMessage("User details updated successfully!");
       dispatch({ type: UPDATE_USER_DETAILS_RESET });
     }
@@ -108,6 +128,16 @@ export const Edit_customer = ({ open, setOpen,setAlertColor, alertColor }) => {
   const branches = branch
     ? branch.map((item) => ({ id: item.branch_id, name: item.branch }))
     : [];
+
+  useMemo(() => {
+    if (branch && Array.isArray(user_details?.branch)) {
+      setChipData(
+        branch
+          .filter((item) => user_details.branch.includes(item.branch_id))
+          .map((item) => ({ id: item.branch_id, name: item.branch }))
+      );
+    }
+  }, [branch]);
 
   return (
     <>
@@ -176,53 +206,58 @@ export const Edit_customer = ({ open, setOpen,setAlertColor, alertColor }) => {
                     )}
                   />
                 </Stack>
+                <Paper
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "5px",
+                    listStyle: "none",
+                    maxWidth: "350px",
+                    p: 0.8,
+                    m: "10px 0px ",
+                  }}
+                  component="div"
+                >
+                  {chipData.map((data) => (
+                    <Chip
+                      key={data.id}
+                      label={data.name}
+                      onDelete={
+                        data.label === "React" ? undefined : handleDelete(data)
+                      }
+                    />
+                  ))}
+                </Paper>
 
-                <Controller
-                  control={control}
-                  name="branch"
-                  render={({ field }) => (
-                    <FormControl style={{ marginTop: "16px", width: "100%" }}>
-                      <Autocomplete
-                        disablePortal
-                        className="cont-input-field"
-                        options={branches}
-                        getOptionLabel={(option) => option.name}
-                        value={
-                          branches.find(
-                            (branch) => branch.id === field.value
-                          ) || null
-                        } // Ensure correct option is selected
-                        onChange={(event, newValue) => {
-                          field.onChange(newValue ? newValue.id : ""); // Set branch ID to form field
+                <Box sx={{ width: "100%" }}>
+                  <Autocomplete
+                    sx={{ width: "100%" }}
+                    autoHighlight
+                    options={branches}
+                    getOptionLabel={(option) => option?.name || ""} // Handle missing or undefined name
+                    onChange={(event, newValue) =>
+                      branch_onchange_handler(event, newValue)
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        InputLabelProps={{
+                          style: { fontSize: "13px", top: "-4px" },
                         }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            InputLabelProps={{
-                              style: {
-                                top: "-4px",
-                                fontSize: "14px", // Set font size for the label text
-                              },
-                            }}
-                            inputProps={{
-                              ...params.inputProps,
-                              style: {
-                                padding: "4px 4px", // Adjust padding as needed
-                                fontSize: "12px", // Ensure the font size matches the above for consistency
-                              },
-                            }}
-                            label="Branch"
-                          />
-                        )}
+                        label="Choose branch"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: {
+                            padding: "4px 4px", // Adjust padding as needed
+                            fontSize: "12px", // Ensure the font size matches the above for consistency
+                          },
+                        }}
                       />
-                      {errors.branch && (
-                        <FormHelperText>{errors.branch.message}</FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                />
+                    )}
+                  />
+                </Box>
 
-                <Controller
+                {/* <Controller
                   control={control}
                   name="authorize"
                   render={({ field }) => (
@@ -261,8 +296,8 @@ export const Edit_customer = ({ open, setOpen,setAlertColor, alertColor }) => {
                       )}
                     </FormControl>
                   )}
-                />
-                <Controller
+                /> */}
+                {/* <Controller
                   control={control}
                   name="role"
                   render={({ field }) => (
@@ -299,7 +334,7 @@ export const Edit_customer = ({ open, setOpen,setAlertColor, alertColor }) => {
                       )}
                     </FormControl>
                   )}
-                />
+                /> */}
                 <Button
                   sx={{
                     padding: "5px 10px",

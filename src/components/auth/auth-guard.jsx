@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import Alert from '@mui/material/Alert';
-import { paths } from '../../paths';
-import { logger } from '../../lib/default-logger';
-import { useUser } from '../../hooks/use-user';
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import Alert from "@mui/material/Alert";
+import { paths } from "../../paths";
+import { logger } from "../../lib/default-logger";
+import { useUser } from "../../hooks/use-user";
 
 export function AuthGuard({ children }) {
   const router = useRouter();
@@ -13,9 +13,6 @@ export function AuthGuard({ children }) {
   const [isChecking, setIsChecking] = React.useState(true);
 
   const checkPermissions = async () => {
-    if (user && user.role !== 'admin') {
-      router.push("/nothing");
-    }
     if (isLoading) {
       return;
     }
@@ -26,7 +23,9 @@ export function AuthGuard({ children }) {
     }
 
     if (!user) {
-      logger.debug('[AuthGuard]: User is not logged in, redirecting to sign in');
+      logger.debug(
+        "[AuthGuard]: User is not logged in, redirecting to sign in"
+      );
       router.replace(paths.auth.signIn);
       return;
     }
