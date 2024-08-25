@@ -8,6 +8,7 @@ export const paths = {
   dashboard: {
     overview: '/dashboard',
     users: '/dashboard/users',
+    websites: '/dashboard/websites',
     customers: '/dashboard/customers',
     branch: '/dashboard/branch',
     settings: '/dashboard/settings',

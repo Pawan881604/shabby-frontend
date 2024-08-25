@@ -7,6 +7,12 @@ export const navItems = [
     icon: "chart-pie",
   },
   {
+    key: "websites",
+    title: "Add Sites",
+    href: paths.dashboard.websites,
+    icon: "chart-pie",
+  },
+  {
     key: "customers",
     title: "Customers",
     href: paths.dashboard.customers,
