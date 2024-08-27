@@ -11,6 +11,7 @@ import {
   TextField,
   Alert,
 } from "@mui/material";
+import { PencilSimple } from "@phosphor-icons/react";
 import {
   Button,
   Dialog,
@@ -25,16 +26,17 @@ import { z } from "zod";
 import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
 import { forwardRef, useEffect, useState } from "react";
-import { clearErrors, update_user } from "api/authapi";
 import { Alert_ } from "styles/theme/alert";
-import { add_branch, update_branch } from "../../../api/branchapi";
 import generateUuid from "../../../lib/Uuidv4";
 
-import {
-  ADD_BRANCH_DETAILS_RESET,
-  UPDATE_BRANCH_DETAILS_RESET,
-} from "lib/redux/constants/branch_actionTypes";
 import { Image_uploader } from "../../../components/common/Image_uploader";
+import { add_website, clearErrors, update_website } from "api/website";
+import {
+  ADD_WEBSITE_DETAILS_RESET,
+  UPDATE_WEBSITE_DETAILS_RESET,
+} from "lib/redux/constants/website_actionTypes";
+import Image from "next/image";
+import { getSiteURL } from "lib/get-site-url";
 
 const schema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -54,12 +56,13 @@ export const Edit_websites = ({
   alertColor,
 }) => {
   const [files, setFiles] = useState(null);
-  console.log(files);
+  const [show_image, setshow_image] = useState(true);
+  const [imgae_url, setimage_url] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
-  const { loading_, branch_details, success, update, error } = useSelector(
-    (state) => state.branch
+  const { loading_, website_details, success, update, error } = useSelector(
+    (state) => state.website
   );
   const {
     control,
@@ -80,12 +83,14 @@ export const Edit_websites = ({
 
   const onSubmit = async (data) => {
     if (isvisible) {
-      dispatch(update_branch(data, branch_details.branch_id));
+      const image = files?files:imgae_url
+     
+      dispatch(update_website(data, image, website_details.website_id));
       handleClose();
       return;
     }
     const uuid = generateUuid();
-    await dispatch(add_branch(data, uuid));
+    await dispatch(add_website(data, files, uuid));
 
     handleClose();
   };
@@ -99,29 +104,34 @@ export const Edit_websites = ({
     }
 
     if (!isvisible) {
+      setValue("title", "");
       setValue("link", "");
-      setValue("branch", "");
+      setValue("description", "");
+      setFiles(null);
+      setimage_url(null)
     }
-    // if (branch_details) {
-    //   setValue("link", branch_details.link || "");
-    //   setValue(
-    //     "branch",
-    //     branch_details.branch === null ? "Not set" : branch_details.branch || ""
-    //   );
-    // }
+
+    if (website_details) {
+      setValue("title", website_details.title || "");
+      setValue("link", website_details.link || "");
+      setValue("description", website_details.discription || "");
+        setimage_url(website_details.image || "")
+    }
+
     if (success) {
       setShowAlert(true);
       setAlertColor(true);
-      setAlertMessage("Branch details Added successfully!");
-      dispatch({ type: ADD_BRANCH_DETAILS_RESET });
+      setAlertMessage("Website details Added successfully!");
+      dispatch({ type: ADD_WEBSITE_DETAILS_RESET });
     }
+
     if (update) {
       setShowAlert(true);
       setAlertColor(true);
-      setAlertMessage("Branch details updated successfully!");
-      dispatch({ type: UPDATE_BRANCH_DETAILS_RESET });
+      setAlertMessage("Website details updated successfully!");
+      dispatch({ type: UPDATE_WEBSITE_DETAILS_RESET });
     }
-  }, [branch_details, setValue, update, dispatch, error, success, isvisible]);
+  }, [website_details, setValue, update, dispatch, error, success, isvisible]);
 
   return (
     <>
@@ -251,7 +261,40 @@ export const Edit_websites = ({
                 </Stack>
 
                 <Stack spacing={2} style={{ marginTop: 15 }}>
-                  <Image_uploader setFiles={setFiles} />
+                  {isvisible ? (
+                    <div style={{ position: "relative", paddingTop: 10 }}>
+                      {show_image ? (
+                        <div>
+                          <Image
+                            src={`${getSiteURL()}${
+                              website_details?.image || ""
+                            }`}
+                            alt="Image"
+                            width={100} // Adjust the width as per your requirement
+                            height={100} // Adjust the height as per your requirement
+                            objectFit="cover" // Optional, to control how the image fits within the dimensions
+                          />
+                        </div>
+                      ) : (
+                        <Image_uploader setFiles={setFiles} />
+                      )}
+                      <div
+                        style={{
+                          position: "absolute",
+                          right: 0,
+                          top: "-10px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <PencilSimple
+                          onClick={() => setshow_image(!show_image)}
+                          size={22}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <Image_uploader setFiles={setFiles} />
+                  )}
                 </Stack>
 
                 <Button

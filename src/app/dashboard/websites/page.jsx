@@ -18,20 +18,23 @@ import {
   ADD_BRANCH_DETAILS_RESET,
   UPDATE_BRANCH_DETAILS_RESET,
 } from "../../../lib/redux/constants/branch_actionTypes";
+import { get_all_website, get_website_details } from "api/website";
+import Image from "next/image";
+import { getSiteURL } from "lib/get-site-url";
 
 const Page = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertColor, setAlertColor] = useState(true);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
-  const { loading, branch, success, update, error } = useSelector(
-    (state) => state.branch
+  const { loading, website, success, update, error } = useSelector(
+    (state) => state.website
   );
   const [open, setOpen] = useState(false);
   const [isvisible, setIsvisible] = useState(true);
 
   useEffect(() => {
-    dispatch(get_all_branch());
+    dispatch(get_all_website());
     if (error) {
       setShowAlert(true);
       setAlertColor(false);
@@ -40,32 +43,51 @@ const Page = () => {
     }
     if (success) {
       setShowAlert(true);
-      setAlertMessage("Branch details Added successfully!");
+      setAlertMessage("Website details Added successfully!");
       dispatch({ type: ADD_BRANCH_DETAILS_RESET });
     }
     if (update) {
       setShowAlert(true);
-      setAlertMessage("User details updated successfully!");
+      setAlertMessage("Website details updated successfully!");
       dispatch({ type: UPDATE_USER_DETAILS_RESET });
     }
   }, [dispatch, update, success, error]);
 
-  const get_single_branch = async (branch_id) => {
-    await dispatch(get_branch_details(branch_id));
+  const get_single_website = async (website_id) => {
+    await dispatch(get_website_details(website_id));
     setOpen(true);
     setIsvisible(true);
   };
 
   const columns = [
     {
-      field: "link",
-      headerName: "Whatsapp Link",
+      field: "title",
+      headerName: "Title",
       flex: 1,
     },
     {
-      field: "branch",
-      headerName: "Branch",
+      field: "link",
+      headerName: "Website Url",
       flex: 1,
+    },
+    {
+      field: "image",
+      headerName: "Image",
+      flex: 1,
+      renderCell: (params) => {
+        const imageUrl = `${getSiteURL()}${params.row.image}`;
+        return (
+          <>
+            <Image
+              src={imageUrl}
+              alt="Image"
+              width={50} // Adjust the width as per your requirement
+              height={50} // Adjust the height as per your requirement
+              objectFit="cover" // Optional, to control how the image fits within the dimensions
+            />
+          </>
+        );
+      },
     },
     {
       field: "status",
@@ -83,7 +105,7 @@ const Page = () => {
       renderCell: (params) => {
         return (
           <>
-            <Button onClick={() => get_single_branch(params.row.id)}>
+            <Button onClick={() => get_single_website(params.row.id)}>
               Edit
             </Button>
           </>
@@ -93,12 +115,13 @@ const Page = () => {
   ];
 
   const rows = [];
-  if (Array.isArray(branch)) {
-    branch.forEach((item, i) => {
+  if (Array.isArray(website)) {
+    website.forEach((item, i) => {
       rows.push({
-        id: item.branch_id,
+        id: item.website_id,
+        title: item.title,
         link: item.link,
-        branch: item.branch,
+        image: item.image,
         // no_users: item.branch,
         status: item.status,
       });

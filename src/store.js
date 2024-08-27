@@ -3,10 +3,12 @@ import { thunk } from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 import {userReducer} from './lib/redux/reducers/user_reducer'
 import { branch_reducer } from "./lib/redux/reducers/branch_reducer";
+import { website_reducer } from "lib/redux/reducers/website_reducer";
 
 const reducer = combineReducers({
   users:userReducer,
-  branch:branch_reducer
+  branch:branch_reducer,
+  website:website_reducer
 });
 
 let inialState = {
