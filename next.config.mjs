@@ -3,7 +3,8 @@ const config = {
     experimental: {
     },
     images: {
-      domains: ['localhost'],
+      // domains: ['localhost','shabby-backend.vercel.app'],
+      domains: ['shabby-backend.vercel.app'],
     },
   };
   

@@ -56,7 +56,7 @@ export function NewCustomers({ sx }) {
       flex: 1,
       renderCell: (params) => {
         const branchId = params.value;
-        const branchItem = branch.find(
+        const branchItem = branch && branch.find(
           (item) => item.branch_id === branchId[0]
         );
 
