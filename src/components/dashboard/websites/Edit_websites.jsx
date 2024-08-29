@@ -42,6 +42,7 @@ const schema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   description: z.string().min(1, { message: "Dscription is required" }),
   link: z.string().min(1, { message: "Website link is required" }),
+  status:z.string().min(1, { message: "Status link is required" }),
 });
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -75,6 +76,7 @@ export const Edit_websites = ({
       title: "",
       description: "",
       link: "",
+      status:"",
     },
   });
   const handleClose = () => {
@@ -107,6 +109,7 @@ export const Edit_websites = ({
       setValue("title", "");
       setValue("link", "");
       setValue("description", "");
+      setValue("status", "");
       setFiles(null);
       setimage_url(null)
     }
@@ -114,6 +117,7 @@ export const Edit_websites = ({
     if (website_details) {
       setValue("title", website_details.title || "");
       setValue("link", website_details.link || "");
+      setValue("status", website_details.status || "");
       setValue("description", website_details.discription || "");
         setimage_url(website_details.image || "")
     }
@@ -259,7 +263,44 @@ export const Edit_websites = ({
                     )}
                   />
                 </Stack>
-
+                <Stack spacing={2}>
+                  <Controller
+                    control={control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormControl
+                        sx={{ marginTop: "13px" }}
+                        error={Boolean(errors.status)}
+                      >
+                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                          Status
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          label="Status"
+                          sx={{
+                            ".MuiSelect-select": {
+                              padding: "8px 10px",
+                              fontSize: "12px",
+                            },
+                          }}
+                        >
+                          <MenuItem value="Active" sx={{ fontSize: "12px" }}>
+                            Active
+                          </MenuItem>
+                          <MenuItem value="Inactive" sx={{ fontSize: "12px" }}>
+                            Inactive
+                          </MenuItem>
+                        </Select>
+                        {errors.status && (
+                          <FormHelperText>
+                            {errors.status.message}
+                          </FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+                </Stack>
                 <Stack spacing={2} style={{ marginTop: 15 }}>
                   {isvisible ? (
                     <div style={{ position: "relative", paddingTop: 10 }}>

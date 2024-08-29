@@ -46,7 +46,7 @@ export const website_reducer = (
         ...state,
         loading: false,
         update: true,
-        website: action.payload.all_data,
+        website: action.payload.all_web,
       };
     case ADD_WEBSITE_DETAILS_SUCCESS:
       return {

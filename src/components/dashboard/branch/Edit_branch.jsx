@@ -38,6 +38,7 @@ import {
 const schema = z.object({
   link: z.string().min(1, { message: "Whatsapp link is required" }),
   branch: z.string().min(1, { message: "Branch is required" }),
+  status: z.string().min(1, { message: "Status is required" }),
 });
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -67,6 +68,7 @@ export const Edit_branch = ({
     defaultValues: {
       link: "",
       branch: "",
+      status: "",
     },
   });
   const handleClose = () => {
@@ -96,9 +98,11 @@ export const Edit_branch = ({
     if (!isvisible) {
       setValue("link", "");
       setValue("branch", "");
+      setValue("status", "");
     }
     if (branch_details) {
       setValue("link", branch_details.link || "");
+      setValue("status", branch_details.status || "");
       setValue(
         "branch",
         branch_details.branch === null ? "Not set" : branch_details.branch || ""
@@ -214,7 +218,44 @@ export const Edit_branch = ({
                     )}
                   />
                 </Stack>
-
+                <Stack spacing={2}>
+                  <Controller
+                    control={control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormControl
+                        sx={{ marginTop: "13px" }}
+                        error={Boolean(errors.status)}
+                      >
+                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                          Status
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          label="Status"
+                          sx={{
+                            ".MuiSelect-select": {
+                              padding: "8px 10px",
+                              fontSize: "12px",
+                            },
+                          }}
+                        >
+                          <MenuItem value="Active" sx={{ fontSize: "12px" }}>
+                            Active
+                          </MenuItem>
+                          <MenuItem value="Inactive" sx={{ fontSize: "12px" }}>
+                            Inactive
+                          </MenuItem>
+                        </Select>
+                        {errors.status && (
+                          <FormHelperText>
+                            {errors.status.message}
+                          </FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+                </Stack>
                 <Button
                   sx={{
                     padding: "5px 10px",

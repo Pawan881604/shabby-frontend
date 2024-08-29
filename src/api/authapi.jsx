@@ -132,6 +132,27 @@ export const ADD_user = (user_data, uuid) => async (dispatch) => {
   }
 };
 
+export const add_normal_user =
+  (user_data, branches, uuid) => async (dispatch) => {
+    const jsonBranches = JSON.stringify(branches);
+    try {
+      const { phone } = user_data;
+      dispatch({ type: ADD_USER_REQUEST });
+      const { data } = await axiosInstance.post(
+        `${getSiteURL()}api/v1/auth/edit-user`,
+        { phone_number:phone, branches:jsonBranches, uuid },
+        others_method()
+      );
+
+      dispatch({ type: ADD_USER_SUCCESS, payload: data.users });
+    } catch (error) {
+      console.log(error);
+      dispatch({
+        type: ADD_USER_FAILURE,
+        payload: error.response.data.message,
+      });
+    }
+  };
 export const get_user_details = (user_id) => async (dispatch) => {
   try {
     dispatch({ type: FETCH_USER_DETAILS_REQUEST });

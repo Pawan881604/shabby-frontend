@@ -24,7 +24,7 @@ const Page = () => {
   const { branch } = useSelector((state) => state.branch);
 
   const [open, setOpen] = useState(false);
-
+  const [isvisible, setIsvisible] = useState(true);
   useEffect(() => {
     dispatch(get_all_users());
     if (error) {
@@ -122,35 +122,55 @@ const Page = () => {
     });
   }
 
+
+  const Show_form = () => {
+    dispatch({ type: UPDATE_USER_DETAILS_RESET });
+    setOpen(true);
+    setIsvisible(false);
+  };
+
+
   return (
     <Stack spacing={3}>
       <Edit_customer
         alertColor={alertColor}
         setAlertColor={setAlertColor}
         open={open}
+        isvisible={isvisible}
         setOpen={setOpen}
       />
-      <Stack direction="row" spacing={3}>
+     <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
-          <Typography variant="h4">Customers</Typography>
-          {/* <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
+          <Typography variant="h4">Branch</Typography>
+
+          {/*   <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+           <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
             Import
           </Button>
-          <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}>
-            Export
-          </Button>
-        </Stack> */}
+            <Button
+              color="inherit"
+            
+            >
+              Add Branch
+            </Button>
+          </Stack>*/}
         </Stack>
         <div>
           {showAlert && (
             <Alert_
-              status={alertColor ? "success" : "error"}
+              status={alertColor?'success':'error'}
               setShowAlert={setShowAlert}
               alertMessage={alertMessage}
               showAlert={showAlert}
             />
           )}
+          <Button
+            startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
+            variant="contained"
+            onClick={() => Show_form()}
+          >
+            Add Branch
+          </Button>
         </div>
       </Stack>
       {/* <CustomersFilters />*/}

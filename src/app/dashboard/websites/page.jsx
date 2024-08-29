@@ -9,18 +9,10 @@ import { Edit_websites } from "../../../components/dashboard/websites/Edit_websi
 import { Data_grid_table } from "../../../lib/Data_grid_table.jsx";
 import { UPDATE_USER_DETAILS_RESET } from "../../../lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
-import {
-  clearErrors,
-  get_all_branch,
-  get_branch_details,
-} from "../../../api/branchapi";
-import {
-  ADD_BRANCH_DETAILS_RESET,
-  UPDATE_BRANCH_DETAILS_RESET,
-} from "../../../lib/redux/constants/branch_actionTypes";
-import { get_all_website, get_website_details } from "api/website";
+import { clearErrors, get_all_website, get_website_details } from "api/website";
 import Image from "next/image";
 import { getSiteURL } from "lib/get-site-url";
+import { ADD_WEBSITE_DETAILS_RESET, UPDATE_WEBSITE_DETAILS_RESET } from "lib/redux/constants/website_actionTypes";
 
 const Page = () => {
   const [showAlert, setShowAlert] = useState(false);
@@ -44,7 +36,7 @@ const Page = () => {
     if (success) {
       setShowAlert(true);
       setAlertMessage("Website details Added successfully!");
-      dispatch({ type: ADD_BRANCH_DETAILS_RESET });
+      dispatch({ type: ADD_WEBSITE_DETAILS_RESET });
     }
     if (update) {
       setShowAlert(true);
@@ -129,7 +121,7 @@ const Page = () => {
   }
 
   const Show_form = () => {
-    dispatch({ type: UPDATE_BRANCH_DETAILS_RESET });
+    dispatch({ type: UPDATE_WEBSITE_DETAILS_RESET });
     setOpen(true);
     setIsvisible(false);
   };
@@ -145,7 +137,7 @@ const Page = () => {
       />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
-          <Typography variant="h4">Branch</Typography>
+          <Typography variant="h4">Website details List</Typography>
 
           {/*   <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
            <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>

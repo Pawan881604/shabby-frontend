@@ -26,15 +26,16 @@ import { z } from "zod";
 import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
 import { forwardRef, useEffect, useMemo, useState } from "react";
-import { clearErrors, update_user } from "api/authapi";
-import { UPDATE_USER_DETAILS_RESET } from "lib/redux/constants/user_actionTypes";
+import { add_normal_user, clearErrors, update_user } from "api/authapi";
+import { ADD_USER_RESET, UPDATE_USER_DETAILS_RESET } from "lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
 import { get_all_branch } from "../../../api/branchapi";
+import generateUuid from "lib/Uuidv4";
 
 const schema = z.object({
   phone: z
     .string()
-    .regex(/^\+?[0-9]{10,13}$/, { message: "Invalid phone number" }),
+    .regex(/^\+91[0-9]{10,13}$/, { message: "Invalid phone number" }),
   // branch: z.string().min(1, { message: "Branch is required" }),
   // authorize: z.string().min(1, { message: "authorize is required" }),
   // role: z.string().min(1, { message: "authorize is required" }),
@@ -44,19 +45,25 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
+export const Edit_customer = ({
+  open,
+  setOpen,
+  setAlertColor,
+  alertColor,
+  isvisible,
+}) => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [chipData, setChipData] = useState([]);
 
-  const { loading: branch_loading, branch } = useSelector(
+  const { loading: branch_loading , branch } = useSelector(
     (state) => state.branch
   );
   const dispatch = useDispatch();
   const {
     loading_: user_details_loading,
     user_details,
-    update,
+    update,success,
     error,
   } = useSelector((state) => state.users);
   const {
@@ -67,7 +74,7 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      phone: "",
+      phone: "+91",
       // branch: "",
       // authorize: "",
       // role: "",
@@ -78,7 +85,13 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
   };
 
   const onSubmit = async (data) => {
-    dispatch(update_user(data, chipData, user_details.user_id));
+    if (isvisible) {
+      dispatch(update_user(data, chipData, user_details.user_id));
+      handleClose();
+      return;
+    }
+    const uuid = generateUuid();
+    dispatch(add_normal_user(data, chipData, uuid));
     handleClose();
   };
 
@@ -102,20 +115,25 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
       setAlertMessage(error);
       dispatch(clearErrors());
     }
+    if (!isvisible) {
+      setValue("phone", "+91");
+      setValue("branch", "");
+      setChipData([]);
+    }
+
     if (user_details) {
       setValue("phone", user_details.phone_number || "");
       setValue(
         "branch",
         user_details.branch === null ? "Not set" : user_details.branch || ""
       );
+    }
+    if (success) {
+      setShowAlert(true);
+      setAlertColor(true);
 
-      setValue("authorize", user_details.authorize || "");
-      setValue("role", user_details.role || "");
-      // if (Array.isArray(user_details.branch)) {
-      //   setChipData(() =>
-      //     user_details.branch.filter((item) => item.includes(branch.branch_id))
-      //   );
-      // }
+      setAlertMessage("Customer added successfully!");
+      dispatch({ type: ADD_USER_RESET });
     }
     if (update) {
       setShowAlert(true);
@@ -123,7 +141,7 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
       setAlertMessage("User details updated successfully!");
       dispatch({ type: UPDATE_USER_DETAILS_RESET });
     }
-  }, [user_details, setValue, update, dispatch, error]);
+  }, [user_details, setValue, update,success , dispatch, error, isvisible]);
 
   const branches = branch
     ? branch.map((item) => ({ id: item.branch_id, name: item.branch }))
@@ -159,7 +177,9 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
         >
           <DialogTitle>
             <Stack spacing={1}>
-              <Typography variant="h4">Update new Customer</Typography>
+              <Typography variant="h4">
+                {isvisible ? "Update" : "Add"} new Customer
+              </Typography>
             </Stack>
           </DialogTitle>
           <DialogContent>
@@ -175,7 +195,7 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
                     showAlert={showAlert}
                   />
                 )}
-                <Stack spacing={2}>
+                <Stack spacing={2} sx={{ marginBottom: 2 }}>
                   <Controller
                     control={control}
                     name="phone"
@@ -193,7 +213,6 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
                             style: { padding: "10px", fontSize: "12px" },
                           }}
                           {...field}
-                          disabled={true}
                           label="phone address"
                           type="phone"
                         />
@@ -206,6 +225,7 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
                     )}
                   />
                 </Stack>
+
                 <Paper
                   sx={{
                     display: "flex",
@@ -214,7 +234,6 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
                     listStyle: "none",
                     maxWidth: "350px",
                     p: 0.8,
-                    m: "10px 0px ",
                   }}
                   component="div"
                 >
@@ -242,13 +261,13 @@ export const Edit_customer = ({ open, setOpen, setAlertColor, alertColor }) => {
                       <TextField
                         {...params}
                         InputLabelProps={{
-                          style: { fontSize: "13px", top: "-4px" },
+                          style: { fontSize: "13px", top: "-6px" },
                         }}
                         label="Choose branch"
                         inputProps={{
                           ...params.inputProps,
                           style: {
-                            padding: "4px 4px", // Adjust padding as needed
+                            padding: "2px 4px", // Adjust padding as needed
                             fontSize: "12px", // Ensure the font size matches the above for consistency
                           },
                         }}

@@ -102,6 +102,7 @@ export const userReducer = (state = { user: [], user_details: {} }, action) => {
         ...state,
         loading: false,
         update: null,
+        user_details: null,
       };
     case ADD_USER_RESET:
       return {
