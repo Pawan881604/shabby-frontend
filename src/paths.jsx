@@ -12,7 +12,8 @@ export const paths = {
     customers: '/dashboard/customers',
     branch: '/dashboard/branch',
     settings: '/dashboard/settings',
-    account: '/dashboard/account'
+    account: '/dashboard/account',
+    offers: '/dashboard/offers'
   },
   errors: {
     notFound: '/errors/not-found'

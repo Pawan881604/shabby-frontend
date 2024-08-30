@@ -19,6 +19,12 @@ export const navItems = [
     icon: "users",
   },
   {
+    key: "offers",
+    title: "Offers",
+    href: paths.dashboard.offers,
+    icon: "users",
+  },
+  {
     key: "branch",
     title: "Branch",
     href: paths.dashboard.branch,
