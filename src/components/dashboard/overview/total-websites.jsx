@@ -4,16 +4,16 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { WhatsappLogo } from "@phosphor-icons/react/dist/ssr/WhatsappLogo";
+import { WhatsappLogo,GitBranch } from "@phosphor-icons/react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import { Box, CircularProgress, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
-export function Branches() {
+export function Total_websites() {
   const [vlaue, setValue] = React.useState("All");
 
-  const { count_branch,loading , active_count, inactive_count } = useSelector(
-    (state) => state.branch
+  const { count_website,loading , active_count, inactive_count } = useSelector(
+    (state) => state.website
   );
   const handleChange = (event) => {
     setValue(event.target.value);
@@ -33,7 +33,7 @@ export function Branches() {
                   : vlaue === "Active"
                   ? "Active"
                   : "Inactive"}{" "}
-                Branches
+                Websites
               </Typography>
             </Stack>
             <Avatar
@@ -43,7 +43,7 @@ export function Branches() {
                 width: "47px",
               }}
             >
-              <WhatsappLogo fontSize="var(--icon-fontSize-lg)" /> 
+              <GitBranch fontSize="var(--icon-fontSize-lg)" /> 
             </Avatar>
           </Stack>
           <Stack
@@ -78,7 +78,7 @@ export function Branches() {
                   variant="h4"
                 >
                   {vlaue === "All"
-                    ? count_branch
+                    ? count_website
                     : vlaue === "Active"
                     ? active_count
                     : inactive_count}

@@ -12,7 +12,10 @@ import { Alert_ } from "styles/theme/alert";
 import { clearErrors, get_all_website, get_website_details } from "api/website";
 import Image from "next/image";
 import { getSiteURL } from "lib/get-site-url";
-import { ADD_WEBSITE_DETAILS_RESET, UPDATE_WEBSITE_DETAILS_RESET } from "lib/redux/constants/website_actionTypes";
+import {
+  ADD_WEBSITE_DETAILS_RESET,
+  UPDATE_WEBSITE_DETAILS_RESET,
+} from "lib/redux/constants/website_actionTypes";
 
 const Page = () => {
   const [showAlert, setShowAlert] = useState(false);
@@ -87,6 +90,19 @@ const Page = () => {
       minWidth: 150,
       maxWidth: 300,
       flex: 1,
+      renderCell: (params) => {
+        const status = params.row.status;
+        return (
+          <div
+            style={{
+              color: status === "Active" ? "green" : "red",
+              fontWeight: 600,
+            }}
+          >
+            {status}
+          </div>
+        );
+      },
     },
     {
       field: "action",

@@ -39,6 +39,8 @@ export const website_reducer = (
         loading: false,
         website: action.payload.web_data,
         count_website: action.payload.count_website,
+        active_count: action.payload.active_count,
+        inactive_count: action.payload.inactive_count,
         resultPerpage: action.payload.resultPerpage,
       };
     case UPDATE_WEBSITE_DETAILS_SUCCESS:

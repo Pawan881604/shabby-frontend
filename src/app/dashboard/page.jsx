@@ -1,20 +1,32 @@
-"use client"
-import * as React from "react";
+"use client";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Branches } from "../../components/dashboard/overview/branches";
 import { NewCustomers } from "../../components/dashboard/overview/new-customers";
 import { TotalCustomers } from "../../components/dashboard/overview/total-customers";
+import { Total_websites } from "components/dashboard/overview/total-websites";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { get_all_website } from "api/website";
+import { get_all_branch } from "api/branchapi";
+import { get_all_users } from "api/authapi";
 
 export default function Page() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(get_all_users());
+    dispatch(get_all_branch());
+    dispatch(get_all_website());
+  }, [dispatch]);
   return (
     <Grid container spacing={3}>
       <Grid lg={3} sm={6} xs={12}>
-        <Branches sx={{ height: "100%" }} />
+        <Branches />
       </Grid>
       <Grid lg={3} sm={6} xs={12}>
-        <TotalCustomers
-          sx={{ height: "100%" }}
-        />
+        <TotalCustomers />
+      </Grid>
+      <Grid lg={3} sm={6} xs={12}>
+        <Total_websites />
       </Grid>
       {/* <Grid lg={3} sm={6} xs={12}>
         <TasksProgress sx={{ height: '100%' }} value={75.5} />

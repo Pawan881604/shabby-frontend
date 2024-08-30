@@ -39,10 +39,7 @@ export function NewCustomers({ sx }) {
   const { loading, user } = useSelector((state) => state.users);
   const { branch } = useSelector((state) => state.branch);
 
-  React.useEffect(() => {
-    dispatch(get_all_users());
-    dispatch(get_all_branch());
-  }, [dispatch]);
+
 
   const columns = [
     {

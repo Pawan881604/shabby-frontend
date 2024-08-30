@@ -65,6 +65,8 @@ export const userReducer = (state = { user: [], user_details: {} }, action) => {
         loading: false,
         user: action.payload.users,
         count_users: action.payload.count_users,
+        inactiveUsersCount: action.payload.inactiveUsersCount,
+        activeUsersCount: action.payload.activeUsersCount,
         resultPerpage: action.payload.resultPerpage,
       };
     case UPDATE_USER_DETAILS_SUCCESS:

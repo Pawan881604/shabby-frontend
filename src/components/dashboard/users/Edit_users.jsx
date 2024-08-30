@@ -6,11 +6,8 @@ import {
   InputLabel,
   OutlinedInput,
   Typography,
-  Alert,
-  Autocomplete,
-  TextField,
-  Paper,
-  Chip,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import {
   Button,
@@ -25,11 +22,8 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
-import { forwardRef, useEffect, useMemo, useState } from "react";
-import { ADD_user, clearErrors } from "../../../api/authapi";
-import { ADD_USER_RESET, UPDATE_USER_DETAILS_RESET } from "../../../lib/redux/constants/user_actionTypes";
-import { Alert_ } from "styles/theme/alert";
-import { get_all_branch } from "../../../api/branchapi";
+import { forwardRef, useEffect } from "react";
+import { ADD_user, update_admin_user } from "../../../api/authapi";
 import generateUuid from "../../../lib/Uuidv4";
 const schema = z.object({
   email: z
@@ -41,21 +35,20 @@ const schema = z.object({
   password: z.string().min(6, {
     message: "Password should be at least 6 characters",
   }),
+  name: z.string().min(1, { message: "Name is required" }),
+  status: z.string().min(1, { message: "status is required" }),
+  role: z.string().min(1, { message: "status is required" }),
 });
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_users = ({ open, setOpen, setAlertColor, alertColor }) => {
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
+export const Edit_users = ({ open, setOpen, isvisible }) => {
   const dispatch = useDispatch();
-  const {
-    loading_: user_details_loading,
-   success,
-    error,
-  } = useSelector((state) => state.users);
+  const { loading_: user_details_loading, user_details } = useSelector(
+    (state) => state.users
+  );
 
   const {
     control,
@@ -67,6 +60,7 @@ export const Edit_users = ({ open, setOpen, setAlertColor, alertColor }) => {
     defaultValues: {
       email: "",
       password: "",
+      name: "",
     },
   });
 
@@ -75,30 +69,32 @@ export const Edit_users = ({ open, setOpen, setAlertColor, alertColor }) => {
   };
 
   const onSubmit = async (data) => {
+    if (isvisible) {
+      dispatch(update_admin_user(data, user_details.user_id));
+      handleClose();
+      return;
+    }
     const uuid = generateUuid();
-    dispatch(ADD_user(data,uuid));
+    dispatch(ADD_user(data, uuid));
     handleClose();
   };
 
   useEffect(() => {
-    dispatch(get_all_branch());
-    if (error) {
-      setShowAlert(true);
-      setAlertColor(false);
-      setAlertMessage(error);   
-      dispatch(clearErrors());
+    if (!isvisible) {
+      setValue("email", "");
+      setValue("password", "");
+      setValue("name", "");
+      setValue("status", "");
+      setValue("role", "");
     }
-    if (success) {
-        setShowAlert(true);
-        setAlertColor(true);
-        setValue("email", "");
-        setValue("password", "");
-        setAlertMessage("User add successfully!");
-        dispatch({ type: ADD_USER_RESET });
-      }
-
-  }, [ setValue, success, dispatch, error]);
-
+    if (user_details) {
+      setValue("email", user_details.email || "");
+      setValue("name", user_details.name || "");
+      setValue("role", user_details.role || "");
+      setValue("password", user_details.password || "");
+      setValue("status", user_details.status || "");
+    }
+  }, [setValue, user_details, dispatch, isvisible]);
   return (
     <>
       <Box>
@@ -127,14 +123,33 @@ export const Edit_users = ({ open, setOpen, setAlertColor, alertColor }) => {
               <Loadin_section />
             ) : (
               <form onSubmit={handleSubmit(onSubmit)}>
-                {showAlert && (
-                  <Alert_
-                    status={alertColor ? "success" : "error"}
-                    setShowAlert={setShowAlert}
-                    alertMessage={alertMessage}
-                    showAlert={showAlert}
+                <Stack spacing={2}>
+                  <Controller
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormControl
+                        sx={{ marginTop: "13px" }}
+                        error={Boolean(errors.name)}
+                      >
+                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                          Name
+                        </InputLabel>
+                        <OutlinedInput
+                          inputProps={{
+                            style: { padding: "10px", fontSize: "12px" },
+                          }}
+                          {...field}
+                          label="Name"
+                          type="name"
+                        />
+                        {errors.name && (
+                          <FormHelperText>{errors.name.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
                   />
-                )}
+                </Stack>
                 <Stack spacing={2}>
                   <Controller
                     control={control}
@@ -163,10 +178,14 @@ export const Edit_users = ({ open, setOpen, setAlertColor, alertColor }) => {
                       </FormControl>
                     )}
                   />
+                </Stack>
+                <Stack spacing={2}>
                   <Controller
                     control={control}
                     name="password"
-                    // disabled={true}
+                    rules={{
+                      required: isvisible && "Password is required",
+                    }}
                     render={({ field }) => (
                       <FormControl
                         sx={{ marginTop: "13px" }}
@@ -182,6 +201,7 @@ export const Edit_users = ({ open, setOpen, setAlertColor, alertColor }) => {
                           {...field}
                           label="Password"
                           type="password"
+                          disabled={isvisible}
                         />
                         {errors.password && (
                           <FormHelperText>
@@ -193,6 +213,80 @@ export const Edit_users = ({ open, setOpen, setAlertColor, alertColor }) => {
                   />
                 </Stack>
 
+                <Stack spacing={2}>
+                  <Controller
+                    control={control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormControl
+                        sx={{ marginTop: "13px" }}
+                        error={Boolean(errors.role)}
+                      >
+                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                          Role
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          label="Status"
+                          sx={{
+                            ".MuiSelect-select": {
+                              padding: "8px 10px",
+                              fontSize: "12px",
+                            },
+                          }}
+                        >
+                          <MenuItem value="Admin" sx={{ fontSize: "12px" }}>
+                            Admin
+                          </MenuItem>
+                          <MenuItem value="Manager" sx={{ fontSize: "12px" }}>
+                            Manager
+                          </MenuItem>
+                        </Select>
+                        {errors.role && (
+                          <FormHelperText>{errors.role.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+                </Stack>
+                <Stack spacing={2}>
+                  <Controller
+                    control={control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormControl
+                        sx={{ marginTop: "13px" }}
+                        error={Boolean(errors.status)}
+                      >
+                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                          Status
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          label="Status"
+                          sx={{
+                            ".MuiSelect-select": {
+                              padding: "8px 10px",
+                              fontSize: "12px",
+                            },
+                          }}
+                        >
+                          <MenuItem value="Active" sx={{ fontSize: "12px" }}>
+                            Active
+                          </MenuItem>
+                          <MenuItem value="Inactive" sx={{ fontSize: "12px" }}>
+                            Inactive
+                          </MenuItem>
+                        </Select>
+                        {errors.status && (
+                          <FormHelperText>
+                            {errors.status.message}
+                          </FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+                </Stack>
                 <Button
                   sx={{
                     padding: "5px 10px",

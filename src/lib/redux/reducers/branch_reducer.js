@@ -39,6 +39,8 @@ export const branch_reducer = (
         loading: false,
         branch: action.payload.branch,
         count_branch: action.payload.count_branch,
+        active_count: action.payload.active_count,
+        inactive_count: action.payload.inactive_count,
         resultPerpage: action.payload.resultPerpage,
       };
     case UPDATE_BRANCH_DETAILS_SUCCESS:

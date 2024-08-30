@@ -115,13 +115,30 @@ export const reset_user_password = (user_data, email) => async (dispatch) => {
   }
 };
 
+export const update_admin_user = (user_data, id) => async (dispatch) => {
+  try {
+    dispatch({ type: UPDATE_USER_DETAILS_REQUEST });
+    const { data } = await axiosInstance.put(
+      `${getSiteURL()}api/v1/auth/edit-admin-user/${id}`,
+      { user_data },
+      others_method()
+    );
+
+    dispatch({ type: UPDATE_USER_DETAILS_SUCCESS, payload: data.users });
+  } catch (error) {
+    dispatch({
+      type: UPDATE_USER_DETAILS_FAILURE,
+      payload: error.response.data.message,
+    });
+  }
+};
+
 export const ADD_user = (user_data, uuid) => async (dispatch) => {
   try {
-    const { email, password } = user_data;
     dispatch({ type: ADD_USER_REQUEST });
     const { data } = await axiosInstance.post(
       `${getSiteURL()}api/v1/auth/edit-admin-user`,
-      { email, password, uuid },
+      { user_data, uuid },
       others_method()
     );
 
@@ -136,11 +153,11 @@ export const add_normal_user =
   (user_data, branches, uuid) => async (dispatch) => {
     const jsonBranches = JSON.stringify(branches);
     try {
-      const { phone } = user_data;
+      const { phone, status } = user_data;
       dispatch({ type: ADD_USER_REQUEST });
       const { data } = await axiosInstance.post(
         `${getSiteURL()}api/v1/auth/edit-user`,
-        { phone_number:phone, branches:jsonBranches, uuid },
+        { phone_number: phone, status, branches: jsonBranches, uuid },
         others_method()
       );
 

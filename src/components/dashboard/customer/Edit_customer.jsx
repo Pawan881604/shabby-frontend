@@ -6,11 +6,12 @@ import {
   InputLabel,
   OutlinedInput,
   Typography,
-  Alert,
   Autocomplete,
   TextField,
   Paper,
   Chip,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import {
   Button,
@@ -27,8 +28,6 @@ import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import { add_normal_user, clearErrors, update_user } from "api/authapi";
-import { ADD_USER_RESET, UPDATE_USER_DETAILS_RESET } from "lib/redux/constants/user_actionTypes";
-import { Alert_ } from "styles/theme/alert";
 import { get_all_branch } from "../../../api/branchapi";
 import generateUuid from "lib/Uuidv4";
 
@@ -36,36 +35,21 @@ const schema = z.object({
   phone: z
     .string()
     .regex(/^\+91[0-9]{10,13}$/, { message: "Invalid phone number" }),
-  // branch: z.string().min(1, { message: "Branch is required" }),
-  // authorize: z.string().min(1, { message: "authorize is required" }),
-  // role: z.string().min(1, { message: "authorize is required" }),
+  status:z.string().min(1, { message: "Status link is required" }),
+    
 });
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_customer = ({
-  open,
-  setOpen,
-  setAlertColor,
-  alertColor,
-  isvisible,
-}) => {
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
+export const Edit_customer = ({ open, setOpen, isvisible }) => {
   const [chipData, setChipData] = useState([]);
-
-  const { loading: branch_loading , branch } = useSelector(
-    (state) => state.branch
-  );
+  const { branch } = useSelector((state) => state.branch);
   const dispatch = useDispatch();
-  const {
-    loading_: user_details_loading,
-    user_details,
-    update,success,
-    error,
-  } = useSelector((state) => state.users);
+  const { loading_: user_details_loading, user_details } = useSelector(
+    (state) => state.users
+  );
   const {
     control,
     handleSubmit,
@@ -75,9 +59,7 @@ export const Edit_customer = ({
     resolver: zodResolver(schema),
     defaultValues: {
       phone: "+91",
-      // branch: "",
-      // authorize: "",
-      // role: "",
+      status:'',
     },
   });
   const handleClose = () => {
@@ -109,39 +91,24 @@ export const Edit_customer = ({
 
   useEffect(() => {
     dispatch(get_all_branch());
-    if (error) {
-      setShowAlert(true);
-      setAlertColor(false);
-      setAlertMessage(error);
-      dispatch(clearErrors());
-    }
+
     if (!isvisible) {
       setValue("phone", "+91");
       setValue("branch", "");
+      setValue("status", "");
+      
       setChipData([]);
     }
 
     if (user_details) {
       setValue("phone", user_details.phone_number || "");
+      setValue("status", user_details.status || "");
       setValue(
         "branch",
         user_details.branch === null ? "Not set" : user_details.branch || ""
       );
     }
-    if (success) {
-      setShowAlert(true);
-      setAlertColor(true);
-
-      setAlertMessage("Customer added successfully!");
-      dispatch({ type: ADD_USER_RESET });
-    }
-    if (update) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("User details updated successfully!");
-      dispatch({ type: UPDATE_USER_DETAILS_RESET });
-    }
-  }, [user_details, setValue, update,success , dispatch, error, isvisible]);
+  }, [user_details, setValue, dispatch, isvisible]);
 
   const branches = branch
     ? branch.map((item) => ({ id: item.branch_id, name: item.branch }))
@@ -187,14 +154,6 @@ export const Edit_customer = ({
               <Loadin_section />
             ) : (
               <form onSubmit={handleSubmit(onSubmit)}>
-                {showAlert && (
-                  <Alert_
-                    status={alertColor ? "success" : "error"}
-                    setShowAlert={setShowAlert}
-                    alertMessage={alertMessage}
-                    showAlert={showAlert}
-                  />
-                )}
                 <Stack spacing={2} sx={{ marginBottom: 2 }}>
                   <Controller
                     control={control}
@@ -275,85 +234,44 @@ export const Edit_customer = ({
                     )}
                   />
                 </Box>
-
-                {/* <Controller
-                  control={control}
-                  name="authorize"
-                  render={({ field }) => (
-                    <FormControl
-                      style={{ marginTop: "15px", width: "100%" }}
-                      error={Boolean(errors.authorize)}
-                    >
-                      <InputLabel sx={{ fontSize: "13px" }}>
-                        Authorize
-                      </InputLabel>
-                      <Select
-                        style={{ top: "6px", padding: "0px", fontSize: "12px" }}
-                        {...field}
-                        label="Authorize"
-                        inputProps={{
-                          sx: { padding: "10px", fontSize: "14px" },
-                        }}
-                        MenuProps={{
-                          PaperProps: {
-                            sx: {
-                              fontSize: "14px",
-                              maxHeight: 200,
-                              overflow: "auto",
-                            },
-                          },
-                        }}
+                <Stack spacing={2}>
+                  <Controller
+                    control={control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormControl
+                        sx={{ marginTop: "13px" }}
+                        error={Boolean(errors.status)}
                       >
-                        <MenuItem value="">Select a options</MenuItem>
-                        <MenuItem value="Yes">Yes</MenuItem>
-                        <MenuItem value="No">No</MenuItem>
-                      </Select>
-                      {errors.authorize && (
-                        <FormHelperText>
-                          {errors.authorize.message}
-                        </FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                /> */}
-                {/* <Controller
-                  control={control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormControl
-                      style={{ marginTop: "15px", width: "100%" }}
-                      error={Boolean(errors.role)}
-                    >
-                      <InputLabel sx={{ fontSize: "13px" }}>
-                        User Roll
-                      </InputLabel>
-                      <Select
-                        style={{ top: "6px", padding: "0px", fontSize: "12px" }}
-                        {...field}
-                        label="User Roll"
-                        inputProps={{
-                          sx: { padding: "10px", fontSize: "14px" },
-                        }}
-                        MenuProps={{
-                          PaperProps: {
-                            sx: {
-                              fontSize: "14px",
-                              maxHeight: 200,
-                              overflow: "auto",
+                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                          Status
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          label="Status"
+                          sx={{
+                            ".MuiSelect-select": {
+                              padding: "8px 10px",
+                              fontSize: "12px",
                             },
-                          },
-                        }}
-                      >
-                        <MenuItem value="">Select a options</MenuItem>
-                        <MenuItem value="admin">Admin</MenuItem>
-                        <MenuItem value="user">User</MenuItem>
-                      </Select>
-                      {errors.role && (
-                        <FormHelperText>{errors.role.message}</FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                /> */}
+                          }}
+                        >
+                          <MenuItem value="Active" sx={{ fontSize: "12px" }}>
+                            Active
+                          </MenuItem>
+                          <MenuItem value="Inactive" sx={{ fontSize: "12px" }}>
+                            Inactive
+                          </MenuItem>
+                        </Select>
+                        {errors.status && (
+                          <FormHelperText>
+                            {errors.status.message}
+                          </FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+                </Stack>
                 <Button
                   sx={{
                     padding: "5px 10px",
