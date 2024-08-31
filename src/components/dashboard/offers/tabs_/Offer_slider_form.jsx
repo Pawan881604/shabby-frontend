@@ -33,7 +33,7 @@ export const Offer_slider_form = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
   const { error, update_loading, success } = useSelector(
-    (state) => state.offers
+    (state) => state.offers_slider
   );
 
   const {

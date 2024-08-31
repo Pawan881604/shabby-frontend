@@ -6,11 +6,7 @@ import Typography from "@mui/material/Typography";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { useDispatch, useSelector } from "react-redux";
 import { TimeAgo } from "lib/TimeAgo";
-import {
-  clearErrors,
-  get_all_users,
-  get_user_details,
-} from "../../../api/authapi";
+import { get_all_users, get_user_details } from "../../../api/authapi";
 import { Data_grid_table } from "../../../lib/Data_grid_table.jsx";
 import {
   ADD_USER_RESET,
@@ -18,21 +14,28 @@ import {
 } from "lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
 import { Offers_form } from "./Offers_form";
+import { clearErrors, get_all_offer } from "api/offerapi";
+import { ADD_OFFER_DETAILS_RESET } from "lib/redux/constants/offer_actionTypes";
+import { getSiteURL } from "lib/get-site-url";
+import Image from "next/image";
+import TimeAndDate from "lib/Date_formet";
 
 export const Offers = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertColor, setAlertColor] = useState(true);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
-  const { loading, user, success, update, error } = useSelector(
-    (state) => state.users
+  const { loading, offer_data, success, error } = useSelector(
+    (state) => state.offers
   );
   const { branch } = useSelector((state) => state.branch);
 
   const [open, setOpen] = useState(false);
   const [isvisible, setIsvisible] = useState(true);
+
   useEffect(() => {
     dispatch(get_all_users());
+    dispatch(get_all_offer());
     if (error) {
       setShowAlert(true);
       setAlertColor(false);
@@ -42,17 +45,17 @@ export const Offers = () => {
     if (success) {
       setShowAlert(true);
       setAlertColor(true);
-
-      setAlertMessage("Customer added successfully!");
-      dispatch({ type: ADD_USER_RESET });
+      setAlertMessage("Offer added successfully!");
+      dispatch(get_all_offer());
+      dispatch({ type: ADD_OFFER_DETAILS_RESET });
     }
-    if (update) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("User details updated successfully!");
-      dispatch({ type: UPDATE_USER_DETAILS_RESET });
-    }
-  }, [dispatch, update, error, success]);
+    // if (update) {
+    //   setShowAlert(true);
+    //   setAlertColor(true);
+    //   setAlertMessage("User details updated successfully!");
+    //   dispatch({ type: UPDATE_USER_DETAILS_RESET });
+    // }
+  }, [dispatch, error, success]);
 
   const get_single_user = async (user_id) => {
     await dispatch(get_user_details(user_id));
@@ -66,35 +69,59 @@ export const Offers = () => {
   };
   const columns = [
     {
-      field: "phone",
-      headerName: "Phone",
+      field: "title",
+      headerName: "Title",
       flex: 1,
     },
     {
-      field: "branch",
-      headerName: "Branch",
+      field: "discription",
+      headerName: "Discription",
+      flex: 1,
+    },
+
+    {
+      field: "valid_date",
+      headerName: "Valid",
       flex: 1,
       renderCell: (params) => {
-        const branchIds = params.row.branch; // Assuming params.value is an array of branch IDs
-        const branchItems =
-          branch &&
-          branch.filter((item, i) => branchIds.includes(item.branch_id));
+        const date = params.row.valid_date;
         return (
-          <div>
-            {branchItems && branchItems.length > 0
-              ? branchItems &&
-                branchItems.map((item, i) => (
-                  <span key={i}>{item.branch},</span>
-                ))
-              : "Branch Not Set"}
+          <div
+            // style={{
+            //   color: status === "Active" ? "green" : "red",
+            //   fontWeight: 600,
+            // }}
+          >
+            <TimeAndDate time={date}/>
+       
           </div>
         );
       },
     },
-
+    {
+      field: "image",
+      headerName: "Image",
+      flex: 1,
+      renderCell: (params) => {
+        const imageUrl = `${getSiteURL()}${params.row.image}`;
+        return (
+          <>
+            <Image
+              src={imageUrl}
+              alt="Image"
+              width={50}
+              height={50}
+              objectFit="cover"
+            />
+          </>
+        );
+      },
+    },
     {
       field: "status",
       headerName: "Status",
+      minWidth: 150,
+      maxWidth: 300,
       flex: 1,
       renderCell: (params) => {
         const status = params.row.status;
@@ -110,25 +137,7 @@ export const Offers = () => {
         );
       },
     },
-    {
-      field: "manager",
-      headerName: "Manager",
-      flex: 1,
-      renderCell: (params) => {
-        const manager = params.row.manager;
-        return <div>{manager ? manager.name : "Self"}</div>;
-      },
-    },
-    {
-      field: "update",
-      headerName: "Last Update",
-      flex: 1,
-      renderCell: (params) => {
-        const updated_at = params.row.update;
-        const created_at = params.row.create;
-        return <TimeAgo time={updated_at !== null ? updated_at : created_at} />;
-      },
-    },
+
     {
       field: "action",
       headerName: "Action",
@@ -146,30 +155,22 @@ export const Offers = () => {
   ];
 
   const rows = [];
-  if (Array.isArray(user)) {
-    user.forEach((item, i) => {
-      if (item.role === "user") {
-        rows.push({
-          id: item.user_id,
-          phone: item.phone_number,
-          branch: item.branch === null ? "Not set" : item.branch,
-          status: item.status,
-          update: item.update_at,
-          manager: item.user,
-          create: item.create_at,
-        });
-      }
+  if (Array.isArray(offer_data)) {
+    offer_data.forEach((item, i) => {
+      rows.push({
+        id: item.offer_id,
+        title: item.title,
+        discription: item.discription,
+        valid_date: item.valid_date,
+        image: item.image && item.image.path,
+        status: item.status,
+      });
     });
   }
 
   return (
     <Stack spacing={3}>
-      <Offers_form
-        open={open}
-        isvisible={isvisible}
-        setIsvisible={setIsvisible}
-        setOpen={setOpen}
-      />
+      <Offers_form open={open} isvisible={isvisible} setOpen={setOpen} />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
           <Typography variant="h4">Offers List</Typography>

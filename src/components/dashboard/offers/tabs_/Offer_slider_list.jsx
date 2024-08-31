@@ -16,7 +16,7 @@ export const Offer_slider_list = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
   const { loading, update,error, offer_slider } = useSelector(
-    (state) => state.offers
+    (state) => state.offers_slider
   );
 
   useEffect(() => {

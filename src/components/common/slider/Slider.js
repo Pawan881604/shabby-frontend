@@ -13,7 +13,7 @@ import { getSiteURL } from "lib/get-site-url";
 import { Loadin_section } from "lib/Loadin_section";
 
 export const Carousel = () => {
-  const { loading, offer_slider } = useSelector((state) => state.offers);
+  const { loading, offer_slider } = useSelector((state) => state.offers_slider);
 
   return (
     <>

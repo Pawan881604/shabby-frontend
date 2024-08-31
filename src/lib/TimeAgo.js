@@ -1,11 +1,19 @@
 import React from "react";
 
 export const TimeAgo = ({ time }) => {
-    // console.log(time)
-  const getTimeDifference = (timestamp) => {
-    const now = new Date();
-    const date = new Date(timestamp);
+  // Convert the provided `time` to a Date object
+  const date =time;
+console.log(time)
+  // Check if the provided date is valid
+  if (isNaN(date.getTime())) {
+    return <span>Invalid date</span>; // Fallback in case of invalid date
+  }
 
+  const now = new Date();
+  const color = now.getTime() < date.getTime() ? "red" : "green"; // Compare timestamps
+
+  const getTimeDifference = (timestamp) => {
+    const date = new Date(timestamp);
     const timeDifference = now - date;
 
     const seconds = Math.floor(timeDifference / 1000);
@@ -13,25 +21,21 @@ export const TimeAgo = ({ time }) => {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (hours < 1) {
-        // Less than 1 hour, show minutes ago
-        return `${minutes} minutes ago`;
-      } else if (days < 1) {
-        // Less than 1 day, show hours ago
-        return `${hours} hours ago`;
+    if (minutes < 1) {
+      return `${seconds} seconds ago`;
+    } else if (hours < 1) {
+      return `${minutes} minutes ago`;
+    } else if (days < 1) {
+      return `${hours} hours ago`;
     } else if (days === 1) {
-        // Exactly 1 day, show yesterday
-        return 'Yesterday';
-      } else if (days < 7) {
-        // Less than 7 days, show days ago
-        return `${days} days ago`;
-      } else {
-        // More than 7 days, show the date
-        const options = { month: 'short', day: 'numeric' };
-        return date.toLocaleDateString(undefined, options);
-      }
-    };
-    
+      return "Yesterday";
+    } else if (days < 7) {
+      return `${days} days ago`;
+    } else {
+      const options = { month: "short", day: "numeric" };
+      return date.toLocaleDateString(undefined, options);
+    }
+  };
 
-  return <span>{getTimeDifference(time)}</span>;
+  return <span style={{ color }}>{getTimeDifference(time)}</span>;
 };

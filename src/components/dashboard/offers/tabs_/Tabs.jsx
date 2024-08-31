@@ -11,7 +11,7 @@ import {
 export const Tabs = () => {
   const dispatch = useDispatch();
   const [index, setindex] = useState(1);
-  const { success, update } = useSelector((state) => state.offers);
+  const { success, update } = useSelector((state) => state.offers_slider);
 
   useEffect(() => {
     dispatch(get_all_offer_slider());
