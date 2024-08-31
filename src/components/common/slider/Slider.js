@@ -7,9 +7,14 @@ import "./slider.css";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-import { Box, Container } from "@mui/material";
+import { Box, CircularProgress, Container } from "@mui/material";
+import { useSelector } from "react-redux";
+import { getSiteURL } from "lib/get-site-url";
+import { Loadin_section } from "lib/Loadin_section";
 
 export const Carousel = () => {
+  const { loading, offer_slider } = useSelector((state) => state.offers);
+
   return (
     <>
       <Container maxWidth="lg">
@@ -27,22 +32,27 @@ export const Carousel = () => {
             modules={[Pagination, Navigation]} // Remove Parallax since it's not used
             className="mySwiper"
           >
-            <SwiperSlide>
-              <Box
-                component="img"
-                alt="Widgets"
-                src="/assets/Easter - Offers - Discounts - Promotions - Banner - Paisagem.jpg"
-                sx={{ height: "auto", width: "100%" }}
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <Box
-                component="img"
-                alt="Widgets"
-                src="/assets/White Blue Simple Special Offer Sale Banner Landscape.jpg"
-                sx={{ height: "auto", width: "100%" }}
-              />
-            </SwiperSlide>
+            {loading ? (
+              <Loadin_section />
+            ) : (
+              offer_slider &&
+              offer_slider.filter(item=>item.status==='Active')
+              .map((item, i) => (
+                <SwiperSlide key={i}>
+                  <Box
+                    component="img"
+                    alt={item.title}
+                    src={`${getSiteURL()}${item.image && item.image.path}`}
+                    sx={{
+                      height: "400px",
+                      width: "100%",
+                      objectFit: "cover", 
+                      objectPosition: "center", 
+                    }}
+                  />
+                </SwiperSlide>
+              ))
+            )}
           </Swiper>
         </Box>
       </Container>

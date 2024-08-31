@@ -4,11 +4,14 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import {userReducer} from './lib/redux/reducers/user_reducer'
 import { branch_reducer } from "./lib/redux/reducers/branch_reducer";
 import { website_reducer } from "lib/redux/reducers/website_reducer";
+import { offer_reducer } from "lib/redux/reducers/offer_reduer";
 
 const reducer = combineReducers({
   users:userReducer,
   branch:branch_reducer,
-  website:website_reducer
+  website:website_reducer,
+  offers:offer_reducer
+  
 });
 
 let inialState = {
