@@ -17,6 +17,12 @@ import {
   FETCH_OFFERS_DETAILS_FAILURE,
   FETCH_OFFERS_DETAILS_REQUEST,
   FETCH_OFFERS_DETAILS_SUCCESS,
+  FETCH_OFFERS_FAILURE,
+  FETCH_OFFERS_REQUEST,
+  FETCH_OFFERS_SUCCESS,
+  UPDATE_OFFER_DETAILS_FAILURE,
+  UPDATE_OFFER_DETAILS_REQUEST,
+  UPDATE_OFFER_DETAILS_SUCCESS,
   UPDATE_OFFER_SLIDER_DETAILS_FAILURE,
   UPDATE_OFFER_SLIDER_DETAILS_RESET,
   UPDATE_OFFER_SLIDER_DETAILS_SUCCESS,
@@ -97,18 +103,56 @@ export const add_offer = (data_, ids, files, uuid) => async (dispatch) => {
   }
 };
 
-export const get_all_offer = () => async (dispatch) => {
+export const update_offer = (ta_, ids, files, uuid, id) => async (dispatch) => {
+  try {
+    dispatch({ type: UPDATE_OFFER_DETAILS_REQUEST });
+    const { data } = await axiosInstance.put(
+      `${getSiteURL()}api/v1/action-offer/${id}`,
+      { data_, ids, image: files, uuid },
+      others_multiform_method()
+    );
+
+    dispatch({ type: UPDATE_OFFER_DETAILS_SUCCESS, payload: data });
+  } catch (error) {
+    dispatch({
+      type: UPDATE_OFFER_DETAILS_FAILURE,
+      payload: error.response.data.message,
+    });
+  }
+};
+
+export const get_offer_details = (id) => async (dispatch) => {
   try {
     dispatch({ type: FETCH_OFFERS_DETAILS_REQUEST });
+    const { data } = await axiosInstance.get(
+      `${getSiteURL()}api/v1/all-offer?offer_id=${id}`,
+      get_method()
+    );
+
+    dispatch({
+      type: FETCH_OFFERS_DETAILS_SUCCESS,
+      payload: data.offer_data[0],
+    });
+  } catch (error) {
+    dispatch({
+      type: FETCH_OFFERS_DETAILS_FAILURE,
+      payload: error.response.data.message,
+    });
+  }
+};
+
+export const get_all_offer = () => async (dispatch) => {
+  try {
+    dispatch({ type: FETCH_OFFERS_REQUEST });
     const { data } = await axiosInstance.get(
       `${getSiteURL()}api/v1/all-offer`,
       get_method()
     );
 
-    dispatch({ type: FETCH_OFFERS_DETAILS_SUCCESS, payload: data });
+    dispatch({ type: FETCH_OFFERS_SUCCESS, payload: data });
   } catch (error) {
     dispatch({
-      type: FETCH_OFFERS_DETAILS_FAILURE,
+      type: FETCH_OFFERS_FAILURE,
       payload: error.response.data.message,
     });
   }

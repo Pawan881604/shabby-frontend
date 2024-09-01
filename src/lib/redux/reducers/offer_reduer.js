@@ -14,6 +14,13 @@ import {
   FETCH_OFFERS_DETAILS_FAILURE,
   FETCH_OFFERS_DETAILS_REQUEST,
   FETCH_OFFERS_DETAILS_SUCCESS,
+  FETCH_OFFERS_FAILURE,
+  FETCH_OFFERS_REQUEST,
+  FETCH_OFFERS_SUCCESS,
+  UPDATE_OFFER_DETAILS_FAILURE,
+  UPDATE_OFFER_DETAILS_REQUEST,
+  UPDATE_OFFER_DETAILS_RESET,
+  UPDATE_OFFER_DETAILS_SUCCESS,
   UPDATE_OFFER_SLIDER_DETAILS_REQUEST,
   UPDATE_OFFER_SLIDER_DETAILS_RESET,
   UPDATE_OFFER_SLIDER_DETAILS_SUCCESS,
@@ -86,32 +93,24 @@ export const offer_slider_reducer = (state = { offer_slider: [] }, action) => {
   }
 };
 
-export const offer_reducer = (state = { offers: [] }, action) => {
+export const offer_reducer = (
+  state = { offer_data: [], offer_details: {} },
+  action
+) => {
   switch (action.type) {
+    case FETCH_OFFERS_REQUEST:
+    case UPDATE_OFFER_DETAILS_REQUEST:
     case ADD_OFFER_DETAILS_REQUEST:
       return {
         ...state,
         loading: true,
       };
     case FETCH_OFFERS_DETAILS_REQUEST:
-    // case UPDATE_OFFER_SLIDER_DETAILS_REQUEST:
       return {
         ...state,
-        loading: true,
+        loading_: true,
       };
-    case ADD_OFFER_DETAILS_SUCCESS:
-      return {
-        ...state,
-        loading: false,
-        success: true,
-      };
-    // case UPDATE_OFFER_SLIDER_DETAILS_SUCCESS:
-    //   return {
-    //     ...state,
-    //     loading: false,
-    //     update: true,
-    //   };
-    case FETCH_OFFERS_DETAILS_SUCCESS:
+    case FETCH_OFFERS_SUCCESS:
       return {
         ...state,
         loading: false,
@@ -121,24 +120,44 @@ export const offer_reducer = (state = { offers: [] }, action) => {
         active_count: action.payload.active_count,
         inactive_count: action.payload.inactive_count,
       };
-    case ADD_OFFER_DETAILS_FAILURE:
-      // case UPDATE_OFFER_SLIDER_DETAILS_REQUEST:
-      case FETCH_OFFERS_DETAILS_FAILURE:
+    case UPDATE_OFFER_DETAILS_SUCCESS:
       return {
         ...state,
         loading: false,
-        success: null,
+        update: true,
+      };
+    case ADD_OFFER_DETAILS_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        success: true,
+      };
+    case FETCH_OFFERS_DETAILS_SUCCESS:
+      return {
+        ...state,
+        loading_: false,
+        offer_details: action.payload,
+      };
+    case FETCH_OFFERS_FAILURE:
+    case FETCH_OFFERS_DETAILS_FAILURE:
+    case UPDATE_OFFER_DETAILS_FAILURE:
+    case ADD_OFFER_DETAILS_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        loading_: false,
         update: null,
+        success: null,
         error: action.payload,
       };
+    case UPDATE_OFFER_DETAILS_RESET:
     case ADD_OFFER_DETAILS_RESET:
-      // case UPDATE_OFFER_SLIDER_DETAILS_RESET:
       return {
         ...state,
         loading: false,
         success: null,
         update: null,
-        offer_slider_details: null,
+        offer_details: null,
       };
 
     case FETCH_OFFER_ERROR:

@@ -5,17 +5,15 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { useDispatch, useSelector } from "react-redux";
-import { TimeAgo } from "lib/TimeAgo";
 import { get_all_users, get_user_details } from "../../../api/authapi";
 import { Data_grid_table } from "../../../lib/Data_grid_table.jsx";
-import {
-  ADD_USER_RESET,
-  UPDATE_USER_DETAILS_RESET,
-} from "lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
 import { Offers_form } from "./Offers_form";
-import { clearErrors, get_all_offer } from "api/offerapi";
-import { ADD_OFFER_DETAILS_RESET } from "lib/redux/constants/offer_actionTypes";
+import { clearErrors, get_all_offer, get_offer_details } from "api/offerapi";
+import {
+  ADD_OFFER_DETAILS_RESET,
+  UPDATE_OFFER_DETAILS_RESET,
+} from "lib/redux/constants/offer_actionTypes";
 import { getSiteURL } from "lib/get-site-url";
 import Image from "next/image";
 import TimeAndDate from "lib/Date_formet";
@@ -25,10 +23,9 @@ export const Offers = () => {
   const [alertColor, setAlertColor] = useState(true);
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
-  const { loading, offer_data, success, error } = useSelector(
+  const { loading, offer_data, success, update, error } = useSelector(
     (state) => state.offers
   );
-  const { branch } = useSelector((state) => state.branch);
 
   const [open, setOpen] = useState(false);
   const [isvisible, setIsvisible] = useState(true);
@@ -49,21 +46,23 @@ export const Offers = () => {
       dispatch(get_all_offer());
       dispatch({ type: ADD_OFFER_DETAILS_RESET });
     }
-    // if (update) {
-    //   setShowAlert(true);
-    //   setAlertColor(true);
-    //   setAlertMessage("User details updated successfully!");
-    //   dispatch({ type: UPDATE_USER_DETAILS_RESET });
-    // }
-  }, [dispatch, error, success]);
+    if (update) {
+      setShowAlert(true);
+      setAlertColor(true);
+      setAlertMessage("User details updated successfully!");
+      dispatch({ type: UPDATE_OFFER_DETAILS_RESET });
+    }
+  }, [dispatch, error, success, update]);
 
   const get_single_user = async (user_id) => {
-    await dispatch(get_user_details(user_id));
+    await dispatch(get_offer_details(user_id));
     setOpen(true);
     setIsvisible(true);
   };
   const Show_form = () => {
-    dispatch({ type: UPDATE_USER_DETAILS_RESET });
+    if (isvisible) {
+      dispatch({ type: UPDATE_OFFER_DETAILS_RESET });
+    }
     setOpen(true);
     setIsvisible(false);
   };
@@ -86,14 +85,8 @@ export const Offers = () => {
       renderCell: (params) => {
         const date = params.row.valid_date;
         return (
-          <div
-            // style={{
-            //   color: status === "Active" ? "green" : "red",
-            //   fontWeight: 600,
-            // }}
-          >
-            <TimeAndDate time={date}/>
-       
+          <div>
+            <TimeAndDate time={date} />
           </div>
         );
       },
@@ -170,7 +163,14 @@ export const Offers = () => {
 
   return (
     <Stack spacing={3}>
-      <Offers_form open={open} isvisible={isvisible} setOpen={setOpen} />
+      <Offers_form
+        open={open}
+        isvisible={isvisible}
+        setOpen={setOpen}
+        setShowAlert={setShowAlert}
+        setAlertColor={setAlertColor}
+        setAlertMessage={setAlertMessage}
+      />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
           <Typography variant="h4">Offers List</Typography>

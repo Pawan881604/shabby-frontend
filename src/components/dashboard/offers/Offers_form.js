@@ -27,7 +27,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import { Alert_ } from "styles/theme/alert";
 import generateUuid from "../../../lib/Uuidv4";
 
@@ -35,30 +35,38 @@ import { Image_uploader } from "../../../components/common/Image_uploader";
 
 import Image from "next/image";
 import { getSiteURL } from "lib/get-site-url";
-import { add_offer } from "api/offerapi";
+import { add_offer, get_offer_details } from "api/offerapi";
 
 const schema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   discription: z.string().min(1, { message: "Discription is required" }),
   status: z.string().min(1, { message: "Status is required" }),
-  valid_date: z.string().min(1, { message: "valid_date is required" }),
+  valid_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
 });
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Offers_form = ({ open, setOpen, isvisible }) => {
+export const Offers_form = ({
+  open,
+  setOpen,
+  isvisible,
+  setShowAlert,
+  setAlertColor,
+  setAlertMessage,
+}) => {
   const [chipData, setChipData] = useState([]);
   const [files, setFiles] = useState(null);
   const [show_image, setshow_image] = useState(true);
   const [imgae_url, setimage_url] = useState(null);
 
   const dispatch = useDispatch();
-  const { loading, offer_data, success, update, error } = useSelector(
+  const { offer_data, success, offer_details } = useSelector(
     (state) => state.offers
   );
   const { user } = useSelector((state) => state.users);
+
   const {
     control,
     handleSubmit,
@@ -70,8 +78,8 @@ export const Offers_form = ({ open, setOpen, isvisible }) => {
       title: "",
       discription: "",
       users: "",
-      status: "",
-      // valid_date: new Date().toISOString().slice(0, 10),
+      status: "Active",
+      valid_date: new Date().toISOString().slice(0, 10),
     },
   });
   const handleClose = () => {
@@ -80,45 +88,66 @@ export const Offers_form = ({ open, setOpen, isvisible }) => {
 
   const onSubmit = async (data) => {
     const ids = chipData && chipData.map((item) => item.id);
-
+    if (!files) {
+      setShowAlert(true);
+      setAlertColor(false);
+      setAlertMessage("Add another one image");
+      return;
+    }
     // if (isvisible) {
     //   const image = files ? files : imgae_url;
 
-    //   dispatch(update_website(data, image, offer_data.website_id));
+    //   // dispatch(get_offer_details(data, image, offer_data.website_id));
     //   handleClose();
     //   return;
     // }
     const uuid = generateUuid();
     await dispatch(add_offer(data, ids, files, uuid));
 
-    // handleClose();
+    handleClose();
   };
 
   useEffect(() => {
     if (!isvisible) {
       setValue("title", "");
       setValue("discription", "");
-      setValue("status", "");
-      setValue("users", "");
+      setValue("status", "Active");
+
       setValue("valid_date", new Date().toISOString().slice(0, 10));
       setFiles(null);
       setimage_url(null);
     }
-    if (offer_data) {
-      setValue("title", offer_data.title || "");
-      setValue("discription", offer_data.link || "");
-      setValue("status", offer_data.status || "");
-      setValue("users", offer_data.status || "");
-      setValue("valid_date", offer_data.discription || "");
-      setimage_url(offer_data.image || "");
-    }
-  }, [offer_data, setValue, dispatch, isvisible]);
+    if (success) {
+      setValue("title", "");
+      setValue("discription", "");
+      setValue("status", "Active");
 
-  const active_users = Array.isArray(user)
-    ? user
-        .filter((item) => item.role === "user" && item.status === "Active")
-        .map((item) => ({ id: item._id, name: item.phone_number }))
-    : [];
+      setFiles(null);
+      setChipData(null);
+      setimage_url(null);
+    }
+    if (offer_details) {
+      let validDate = offer_details.valid_date;
+
+      // Try to parse the date, or use a fallback date (e.g., today's date) if invalid
+      if (validDate) {
+        const parsedDate = new Date(validDate);
+        if (!isNaN(parsedDate.getTime())) {
+          validDate = parsedDate.toISOString().slice(0, 10);
+        } else {
+          console.warn("Invalid date value provided. Using default date.");
+          validDate = new Date().toISOString().slice(0, 10); // Fallback to today's date
+        }
+      } else {
+        validDate = new Date().toISOString().slice(0, 10); // Fallback to today's date
+      }
+      setValue("valid_date", validDate);
+      setValue("title", offer_details.title || "");
+      setValue("discription", offer_details.discription || "");
+      setValue("status", offer_details.status || "");
+      setimage_url(offer_details.image?.path || "");
+    }
+  }, [offer_details, setValue, success, dispatch, isvisible]);
 
   const handleDelete = (ChipData) => () => {
     setChipData((chips) => chips.filter((chip) => chip.id !== ChipData.id));
@@ -131,6 +160,26 @@ export const Offers_form = ({ open, setOpen, isvisible }) => {
       setChipData((prev) => [newValue, ...prev]);
     }
   };
+
+  const active_users = Array.isArray(user)
+    ? user
+        .filter((item) => item.role === "user" && item.status === "Active")
+        .map((item) => ({ id: item._id, name: item.phone_number }))
+    : [];
+
+  useMemo(() => {
+    if (user && Array.isArray(offer_details?.applicable_users)) {
+      const d = user
+        .filter((item) => offer_details.applicable_users.includes(item._id))
+        // .map((item) => ({ id: item.user, name: user.branch }));
+      console.log(d);
+      setChipData(
+        user
+          .filter((item) => offer_details.applicable_users.includes(item._id))
+          .map((item) => ({ id: item.user, name: user.branch }))
+      );
+    }
+  }, [user]);
 
   return (
     <>
