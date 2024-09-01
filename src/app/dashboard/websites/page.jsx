@@ -7,7 +7,6 @@ import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { useDispatch, useSelector } from "react-redux";
 import { Edit_websites } from "../../../components/dashboard/websites/Edit_websites";
 import { Data_grid_table } from "../../../lib/Data_grid_table.jsx";
-import { UPDATE_USER_DETAILS_RESET } from "../../../lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
 import { clearErrors, get_all_website, get_website_details } from "api/website";
 import Image from "next/image";
@@ -16,17 +15,25 @@ import {
   ADD_WEBSITE_DETAILS_RESET,
   UPDATE_WEBSITE_DETAILS_RESET,
 } from "lib/redux/constants/website_actionTypes";
+import { CircularProgress } from "@mui/material";
 
 const Page = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertColor, setAlertColor] = useState(true);
+  const [loadingStates, setLoadingStates] = useState({});
   const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
-  const { loading, website, success, update, error } = useSelector(
-    (state) => state.website
-  );
+  const {
+    loading,
+    website,
+    count_website,
+    resultPerpage,
+    success,
+    update,
+    error,
+  } = useSelector((state) => state.website);
   const [open, setOpen] = useState(false);
-  const [isvisible, setIsvisible] = useState(true);
+  const [isvisible, setIsvisible] = useState(false);
 
   useEffect(() => {
     dispatch(get_all_website());
@@ -38,20 +45,33 @@ const Page = () => {
     }
     if (success) {
       setShowAlert(true);
+      setAlertColor(true);
       setAlertMessage("Website details Added successfully!");
       dispatch({ type: ADD_WEBSITE_DETAILS_RESET });
     }
+
     if (update) {
       setShowAlert(true);
+      setAlertColor(true);
       setAlertMessage("Website details updated successfully!");
-      dispatch({ type: UPDATE_USER_DETAILS_RESET });
+      dispatch({ type: UPDATE_WEBSITE_DETAILS_RESET });
     }
   }, [dispatch, update, success, error]);
 
   const get_single_website = async (website_id) => {
-    await dispatch(get_website_details(website_id));
-    setOpen(true);
-    setIsvisible(true);
+    setLoadingStates((prevState) => ({ ...prevState, [website_id]: true }));
+
+    try {
+      await dispatch(get_website_details(website_id));
+      setOpen(true);
+      setIsvisible(true);
+    } catch (error) {
+      setShowAlert(true);
+      setAlertColor(false);
+      setAlertMessage(error);
+    } finally {
+      setLoadingStates((prevState) => ({ ...prevState, [website_id]: false }));
+    }
   };
 
   const columns = [
@@ -111,12 +131,15 @@ const Page = () => {
       flex: 1,
       shortable: false,
       renderCell: (params) => {
+        const isLoading = loadingStates[params.row.id] || false; // Get the loading state for this specific row
         return (
-          <>
-            <Button onClick={() => get_single_website(params.row.id)}>
-              Edit
-            </Button>
-          </>
+          <Button
+            onClick={() => get_single_website(params.row.id)}
+            color="secondary"
+            disabled={isLoading} // Disable only if this row is loading
+          >
+            {isLoading ? <CircularProgress size={24} /> : "Edit"}
+          </Button>
         );
       },
     },
@@ -129,7 +152,7 @@ const Page = () => {
         id: item.website_id,
         title: item.title,
         link: item.link,
-        image: item.image,
+        image: item.image?.path,
         // no_users: item.branch,
         status: item.status,
       });
@@ -137,7 +160,9 @@ const Page = () => {
   }
 
   const Show_form = () => {
-    dispatch({ type: UPDATE_WEBSITE_DETAILS_RESET });
+    if (isvisible) {
+      dispatch({ type: UPDATE_WEBSITE_DETAILS_RESET });
+    }
     setOpen(true);
     setIsvisible(false);
   };
@@ -147,25 +172,14 @@ const Page = () => {
       <Edit_websites
         open={open}
         setAlertColor={setAlertColor}
-        alertColor={alertColor}
+        setShowAlert={setShowAlert}
+        setAlertMessage={setAlertMessage}
         setOpen={setOpen}
         isvisible={isvisible}
       />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
-          <Typography variant="h4">Website details List</Typography>
-
-          {/*   <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-           <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
-            Import
-          </Button>
-            <Button
-              color="inherit"
-            
-            >
-              Add Branch
-            </Button>
-          </Stack>*/}
+          <Typography variant="h4">Website List</Typography>
         </Stack>
         <div>
           {showAlert && (
@@ -186,7 +200,14 @@ const Page = () => {
         </div>
       </Stack>
       {/* <CustomersFilters />*/}
-      <Data_grid_table rows={rows} columns={columns} loading={loading} />
+      <Data_grid_table
+        rows={rows}
+        columns={columns}
+        loading={loading}
+       
+        totalPages={count_website}
+        pageSize={resultPerpage}
+      />
     </Stack>
   );
 };

@@ -22,6 +22,11 @@ export const website_reducer = (
 ) => {
   switch (action.type) {
     case FETCH_WEBSITE_REQUEST:
+      return {
+        ...state,
+        loading: true,
+      };
+      
     case UPDATE_WEBSITE_DETAILS_REQUEST:
     case ADD_WEBSITE_DETAILS_REQUEST:
       return {
@@ -48,14 +53,12 @@ export const website_reducer = (
         ...state,
         loading: false,
         update: true,
-        website: action.payload.all_web,
       };
     case ADD_WEBSITE_DETAILS_SUCCESS:
       return {
         ...state,
         loading: false,
         success: true,
-        website: action.payload.all_web_data,
       };
     case FETCH_WEBSITE_DETAILS_SUCCESS:
       return {

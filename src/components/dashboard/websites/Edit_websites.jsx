@@ -19,7 +19,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import Slide from "@mui/material/Slide";
+
 import { Box, Stack } from "@mui/system";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -37,16 +37,13 @@ import {
 } from "lib/redux/constants/website_actionTypes";
 import Image from "next/image";
 import { getSiteURL } from "lib/get-site-url";
+import { Transition } from "lib/healper";
 
 const schema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   description: z.string().min(1, { message: "Dscription is required" }),
   link: z.string().min(1, { message: "Website link is required" }),
-  status:z.string().min(1, { message: "Status link is required" }),
-});
-
-const Transition = forwardRef(function Transition(props, ref) {
-  return <Slide direction="left" ref={ref} {...props} />;
+  status: z.string().min(1, { message: "Status link is required" }),
 });
 
 export const Edit_websites = ({
@@ -54,17 +51,13 @@ export const Edit_websites = ({
   setOpen,
   isvisible,
   setAlertColor,
-  alertColor,
+  setShowAlert,
+  setAlertMessage,
 }) => {
   const [files, setFiles] = useState(null);
   const [show_image, setshow_image] = useState(true);
-  const [imgae_url, setimage_url] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
-  const { loading_, website_details, success, update, error } = useSelector(
-    (state) => state.website
-  );
+  const { website_details, success } = useSelector((state) => state.website);
   const {
     control,
     handleSubmit,
@@ -76,7 +69,7 @@ export const Edit_websites = ({
       title: "",
       description: "",
       link: "",
-      status:"",
+      status: "Active",
     },
   });
   const handleClose = () => {
@@ -84,9 +77,14 @@ export const Edit_websites = ({
   };
 
   const onSubmit = async (data) => {
+    if (!files && !isvisible) {
+      setShowAlert(true);
+      setAlertColor(false);
+      setAlertMessage("Add another one image");
+      return;
+    }
     if (isvisible) {
-      const image = files?files:imgae_url
-     
+      const image = files ? files : website_details.image._id;
       dispatch(update_website(data, image, website_details.website_id));
       handleClose();
       return;
@@ -98,44 +96,27 @@ export const Edit_websites = ({
   };
 
   useEffect(() => {
-    if (error) {
-      setShowAlert(true);
-      setAlertMessage(error);
-      setAlertColor(false);
-      dispatch(clearErrors());
-    }
-
     if (!isvisible) {
       setValue("title", "");
       setValue("link", "");
       setValue("description", "");
-      setValue("status", "");
+      setValue("status", "Active");
       setFiles(null);
-      setimage_url(null)
     }
-
+    if (success) {
+      setValue("title", "");
+      setValue("link", "");
+      setValue("description", "");
+      setValue("status", "Active");
+      setFiles(null);
+    }
     if (website_details) {
       setValue("title", website_details.title || "");
       setValue("link", website_details.link || "");
       setValue("status", website_details.status || "");
       setValue("description", website_details.discription || "");
-        setimage_url(website_details.image || "")
     }
-
-    if (success) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("Website details Added successfully!");
-      dispatch({ type: ADD_WEBSITE_DETAILS_RESET });
-    }
-
-    if (update) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("Website details updated successfully!");
-      dispatch({ type: UPDATE_WEBSITE_DETAILS_RESET });
-    }
-  }, [website_details, setValue, update, dispatch, error, success, isvisible]);
+  }, [website_details, setValue, dispatch, success, isvisible]);
 
   return (
     <>
@@ -163,194 +144,176 @@ export const Edit_websites = ({
             </Stack>
           </DialogTitle>
           <DialogContent>
-            {loading_ ? (
-              <Loadin_section />
-            ) : (
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {showAlert && (
-                  <Alert_
-                    status={alertColor ? "success" : "error"}
-                    setShowAlert={setShowAlert}
-                    alertMessage={alertMessage}
-                    showAlert={showAlert}
-                  />
-                )}
-                <Stack spacing={2}>
-                  <Controller
-                    control={control}
-                    name="title"
-                    // disabled={true}
-                    render={({ field }) => (
-                      <FormControl
-                        sx={{ marginTop: "13px" }}
-                        error={Boolean(errors.title)}
-                      >
-                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
-                          Site title
-                        </InputLabel>
-                        <OutlinedInput
-                          inputProps={{
-                            style: { padding: "10px", fontSize: "12px" },
-                          }}
-                          {...field}
-                          label="Site title"
-                          type="title"
-                        />
-                        {errors.title && (
-                          <FormHelperText>
-                            {errors.title.message}
-                          </FormHelperText>
-                        )}
-                      </FormControl>
-                    )}
-                  />
-                </Stack>
-                <Stack spacing={2}>
-                  <Controller
-                    control={control}
-                    name="description"
-                    // disabled={true}
-                    render={({ field }) => (
-                      <FormControl
-                        sx={{ marginTop: "13px" }}
-                        error={Boolean(errors.description)}
-                      >
-                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
-                          Site description
-                        </InputLabel>
-                        <OutlinedInput
-                          inputProps={{
-                            style: { padding: "10px", fontSize: "12px" },
-                          }}
-                          {...field}
-                          label="Site description"
-                          type="description"
-                        />
-                        {errors.description && (
-                          <FormHelperText>
-                            {errors.description.message}
-                          </FormHelperText>
-                        )}
-                      </FormControl>
-                    )}
-                  />
-                </Stack>
-                <Stack spacing={2}>
-                  <Controller
-                    control={control}
-                    name="link"
-                    // disabled={true}
-                    render={({ field }) => (
-                      <FormControl
-                        sx={{ marginTop: "13px" }}
-                        error={Boolean(errors.link)}
-                      >
-                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
-                          Site Link
-                        </InputLabel>
-                        <OutlinedInput
-                          inputProps={{
-                            style: { padding: "10px", fontSize: "12px" },
-                          }}
-                          {...field}
-                          label="Site Link"
-                          type="link"
-                        />
-                        {errors.link && (
-                          <FormHelperText>{errors.link.message}</FormHelperText>
-                        )}
-                      </FormControl>
-                    )}
-                  />
-                </Stack>
-                <Stack spacing={2}>
-                  <Controller
-                    control={control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormControl
-                        sx={{ marginTop: "13px" }}
-                        error={Boolean(errors.status)}
-                      >
-                        <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
-                          Status
-                        </InputLabel>
-                        <Select
-                          {...field}
-                          label="Status"
-                          sx={{
-                            ".MuiSelect-select": {
-                              padding: "8px 10px",
-                              fontSize: "12px",
-                            },
-                          }}
-                        >
-                          <MenuItem value="Active" sx={{ fontSize: "12px" }}>
-                            Active
-                          </MenuItem>
-                          <MenuItem value="Inactive" sx={{ fontSize: "12px" }}>
-                            Inactive
-                          </MenuItem>
-                        </Select>
-                        {errors.status && (
-                          <FormHelperText>
-                            {errors.status.message}
-                          </FormHelperText>
-                        )}
-                      </FormControl>
-                    )}
-                  />
-                </Stack>
-                <Stack spacing={2} style={{ marginTop: 15 }}>
-                  {isvisible ? (
-                    <div style={{ position: "relative", paddingTop: 10 }}>
-                      {show_image ? (
-                        <div>
-                          <Image
-                            src={`${getSiteURL()}${
-                              website_details?.image || ""
-                            }`}
-                            alt="Image"
-                            width={100} // Adjust the width as per your requirement
-                            height={100} // Adjust the height as per your requirement
-                            objectFit="cover" // Optional, to control how the image fits within the dimensions
-                          />
-                        </div>
-                      ) : (
-                        <Image_uploader setFiles={setFiles} />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Stack spacing={2}>
+                <Controller
+                  control={control}
+                  name="title"
+                  // disabled={true}
+                  render={({ field }) => (
+                    <FormControl
+                      sx={{ marginTop: "13px" }}
+                      error={Boolean(errors.title)}
+                    >
+                      <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                        Site title
+                      </InputLabel>
+                      <OutlinedInput
+                        inputProps={{
+                          style: { padding: "10px", fontSize: "12px" },
+                        }}
+                        {...field}
+                        label="Site title"
+                        type="title"
+                      />
+                      {errors.title && (
+                        <FormHelperText>{errors.title.message}</FormHelperText>
                       )}
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: 0,
-                          top: "-10px",
-                          cursor: "pointer",
+                    </FormControl>
+                  )}
+                />
+              </Stack>
+              <Stack spacing={2}>
+                <Controller
+                  control={control}
+                  name="description"
+                  // disabled={true}
+                  render={({ field }) => (
+                    <FormControl
+                      sx={{ marginTop: "13px" }}
+                      error={Boolean(errors.description)}
+                    >
+                      <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                        Site description
+                      </InputLabel>
+                      <OutlinedInput
+                        inputProps={{
+                          style: { padding: "10px", fontSize: "12px" },
+                        }}
+                        {...field}
+                        label="Site description"
+                        type="description"
+                      />
+                      {errors.description && (
+                        <FormHelperText>
+                          {errors.description.message}
+                        </FormHelperText>
+                      )}
+                    </FormControl>
+                  )}
+                />
+              </Stack>
+              <Stack spacing={2}>
+                <Controller
+                  control={control}
+                  name="link"
+                  // disabled={true}
+                  render={({ field }) => (
+                    <FormControl
+                      sx={{ marginTop: "13px" }}
+                      error={Boolean(errors.link)}
+                    >
+                      <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                        Site Link
+                      </InputLabel>
+                      <OutlinedInput
+                        inputProps={{
+                          style: { padding: "10px", fontSize: "12px" },
+                        }}
+                        {...field}
+                        label="Site Link"
+                        type="link"
+                      />
+                      {errors.link && (
+                        <FormHelperText>{errors.link.message}</FormHelperText>
+                      )}
+                    </FormControl>
+                  )}
+                />
+              </Stack>
+              <Stack spacing={2}>
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormControl
+                      sx={{ marginTop: "13px" }}
+                      error={Boolean(errors.status)}
+                    >
+                      <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                        Status
+                      </InputLabel>
+                      <Select
+                        {...field}
+                        label="Status"
+                        sx={{
+                          ".MuiSelect-select": {
+                            padding: "8px 10px",
+                            fontSize: "12px",
+                          },
                         }}
                       >
-                        <PencilSimple
-                          onClick={() => setshow_image(!show_image)}
-                          size={22}
+                        <MenuItem value="Active" sx={{ fontSize: "12px" }}>
+                          Active
+                        </MenuItem>
+                        <MenuItem value="Inactive" sx={{ fontSize: "12px" }}>
+                          Inactive
+                        </MenuItem>
+                      </Select>
+                      {errors.status && (
+                        <FormHelperText>{errors.status.message}</FormHelperText>
+                      )}
+                    </FormControl>
+                  )}
+                />
+              </Stack>
+              <Stack spacing={2} style={{ marginTop: 15 }}>
+                {isvisible ? (
+                  <div style={{ position: "relative", paddingTop: 10 }}>
+                    {show_image ? (
+                      <div>
+                        <Image
+                          src={`${getSiteURL()}${website_details?.image?.path}`}
+                          alt="Image"
+                          width={100} // Adjust the width as per your requirement
+                          height={100} // Adjust the height as per your requirement
+                          objectFit="cover" // Optional, to control how the image fits within the dimensions
                         />
                       </div>
+                    ) : (
+                      <Image_uploader setFiles={setFiles} />
+                    )}
+                    <div
+                      style={{
+                        position: "absolute",
+                        right: 0,
+                        top: "-10px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <PencilSimple
+                        onClick={() => setshow_image(!show_image)}
+                        size={22}
+                      />
                     </div>
-                  ) : (
-                    <Image_uploader setFiles={setFiles} />
-                  )}
-                </Stack>
+                  </div>
+                ) : (
+                  <Image_uploader setFiles={setFiles} />
+                )}
+              </Stack>
 
-                <Button
-                  sx={{
-                    padding: "5px 10px",
-                    marginTop: "15px",
-                    fontSize: "14px",
-                  }}
-                  type="submit"
-                  variant="contained"
-                >
-                  Add New
-                </Button>
-              </form>
-            )}
+              <Button
+                sx={{
+                  padding: "5px 10px",
+                  marginTop: "15px",
+                  fontSize: "14px",
+                }}
+                type="submit"
+                variant="contained"
+              >
+                Add New
+              </Button>
+            </form>
           </DialogContent>
           <DialogActions></DialogActions>
         </Dialog>
