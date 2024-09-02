@@ -35,16 +35,16 @@ const schema = z.object({
   phone: z
     .string()
     .regex(/^\+91[0-9]{10,13}$/, { message: "Invalid phone number" }),
-  status:z.string().min(1, { message: "Status link is required" }),
-    
+  status: z.string().min(1, { message: "Status link is required" }),
 });
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_customer = ({ open, setOpen, isvisible }) => {
+export const Edit_customer = ({ open,  isvisible ,setOpen}) => {
   const [chipData, setChipData] = useState([]);
+
   const { branch } = useSelector((state) => state.branch);
   const dispatch = useDispatch();
   const { loading_: user_details_loading, user_details } = useSelector(
@@ -59,22 +59,18 @@ export const Edit_customer = ({ open, setOpen, isvisible }) => {
     resolver: zodResolver(schema),
     defaultValues: {
       phone: "+91",
-      status:'',
+      status: "Active",
     },
   });
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const onSubmit = async (data) => {
     if (isvisible) {
       dispatch(update_user(data, chipData, user_details.user_id));
-      handleClose();
+
       return;
     }
     const uuid = generateUuid();
     dispatch(add_normal_user(data, chipData, uuid));
-    handleClose();
   };
 
   const handleDelete = (ChipData) => () => {
@@ -94,35 +90,26 @@ export const Edit_customer = ({ open, setOpen, isvisible }) => {
 
     if (!isvisible) {
       setValue("phone", "+91");
-      setValue("branch", "");
-      setValue("status", "");
-      
+      setValue("status", "Active");
       setChipData([]);
     }
 
     if (user_details) {
       setValue("phone", user_details.phone_number || "");
       setValue("status", user_details.status || "");
-      setValue(
-        "branch",
-        user_details.branch === null ? "Not set" : user_details.branch || ""
+      setChipData(
+        user_details.branch &&
+          user_details.branch.map((item) => ({
+            id: item._id,
+            name: item.branch,
+          }))
       );
     }
   }, [user_details, setValue, dispatch, isvisible]);
 
   const branches = branch
-    ? branch.map((item) => ({ id: item.branch_id, name: item.branch }))
+    ? branch.map((item) => ({ id: item._id, name: item.branch }))
     : [];
-
-  useMemo(() => {
-    if (branch && Array.isArray(user_details?.branch)) {
-      setChipData(
-        branch
-          .filter((item) => user_details.branch.includes(item.branch_id))
-          .map((item) => ({ id: item.branch_id, name: item.branch }))
-      );
-    }
-  }, [branch]);
 
   return (
     <>
@@ -131,7 +118,7 @@ export const Edit_customer = ({ open, setOpen, isvisible }) => {
           open={open}
           TransitionComponent={Transition}
           keepMounted
-          onClose={handleClose}
+          onClose={()=> setOpen(false)}
           className="add-cus"
           aria-describedby="alert-dialog-slide-description"
           PaperProps={{
@@ -196,15 +183,18 @@ export const Edit_customer = ({ open, setOpen, isvisible }) => {
                   }}
                   component="div"
                 >
-                  {chipData.map((data) => (
-                    <Chip
-                      key={data.id}
-                      label={data.name}
-                      onDelete={
-                        data.label === "React" ? undefined : handleDelete(data)
-                      }
-                    />
-                  ))}
+                  {chipData &&
+                    chipData.map((data) => (
+                      <Chip
+                        key={data._id}
+                        label={data.name}
+                        onDelete={
+                          data.label === "React"
+                            ? undefined
+                            : handleDelete(data)
+                        }
+                      />
+                    ))}
                 </Paper>
 
                 <Box sx={{ width: "100%" }}>

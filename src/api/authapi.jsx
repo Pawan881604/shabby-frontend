@@ -59,22 +59,22 @@ export const Login_user = async (email, password, uuid) => {
 };
 
 //_________________________________________________________________
-export const get_all_users = () => async (dispatch) => {
-  try {
-    dispatch({ type: FETCH_USER_REQUEST });
-    const { data } = await axiosInstance.get(
-      `${getSiteURL()}api/v1/auth/all-users`,
-      get_method()
-    );
+export const get_all_users =
+  (currentPage = 1,user) =>
+  async (dispatch) => {
+    try {
+      dispatch({ type: FETCH_USER_REQUEST });
+      let link = `${getSiteURL()}api/v1/auth/all-users?page=${currentPage}&user.role=${user}`;
+      const { data } = await axiosInstance.get(link, get_method());
 
-    dispatch({ type: FETCH_USER_SUCCESS, payload: data });
-  } catch (error) {
-    dispatch({
-      type: FETCH_USER_FAILURE,
-      payload: error.response.data.message,
-    });
-  }
-};
+      dispatch({ type: FETCH_USER_SUCCESS, payload: data });
+    } catch (error) {
+      dispatch({
+        type: FETCH_USER_FAILURE,
+        payload: error.response.data.message,
+      });
+    }
+  };
 
 export const update_user = (user_data, branches, id) => async (dispatch) => {
   try {
@@ -151,6 +151,7 @@ export const ADD_user = (user_data, uuid) => async (dispatch) => {
 
 export const add_normal_user =
   (user_data, branches, uuid) => async (dispatch) => {
+    console.log(user_data, branches, uuid)
     const jsonBranches = JSON.stringify(branches);
     try {
       const { phone, status } = user_data;

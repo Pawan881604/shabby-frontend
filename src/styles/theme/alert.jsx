@@ -10,7 +10,7 @@ export const Alert_ = ({
   error,
   clearErrors,
   add_reset,
-  update_reset,get_data,currentPage
+  update_reset,get_data,currentPage,filter_1,setOpen
 }) => {
   const dispatch = useDispatch();
   const { show, message, color } = useSelector((state) => state.alert);
@@ -23,14 +23,16 @@ export const Alert_ = ({
     if (success) {
       dispatch(showAlert("Details Added successfully!", "success"));
       dispatch({ type: add_reset });
-      dispatch(get_data(currentPage));
+      dispatch(get_data(currentPage,filter_1));
+      setOpen(false);
     }
     if (update) {
       dispatch(showAlert("Details Updated successfully!", "success"));
       dispatch({ type: update_reset });
-      dispatch(get_data(currentPage));
+      dispatch(get_data(currentPage,filter_1));
+      setOpen(false);
     }
-  }, [dispatch, update, success, error,currentPage]);
+  }, [dispatch, update, success, error,currentPage,]);
 
   useEffect(() => {
     if (show) {

@@ -92,8 +92,7 @@ export const userReducer = (state = { user: [], user_details: {} }, action) => {
         ...state,
         loading: false,
         loading_: false,
-        user: null,
-        user_details: null,
+    
         update: null,
         success: null,
         error: action.payload,

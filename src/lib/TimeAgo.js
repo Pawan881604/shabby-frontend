@@ -1,19 +1,18 @@
 import React from "react";
 
 export const TimeAgo = ({ time }) => {
-  // Convert the provided `time` to a Date object
-  const date =time;
-console.log(time)
-  // Check if the provided date is valid
-  if (isNaN(date.getTime())) {
+  // Attempt to convert the provided `time` to a Date object
+  const date = new Date(time);
+
+  // Check if the date is valid
+  if (Object.prototype.toString.call(date) !== "[object Date]" || isNaN(date.getTime())) {
     return <span>Invalid date</span>; // Fallback in case of invalid date
   }
 
   const now = new Date();
   const color = now.getTime() < date.getTime() ? "red" : "green"; // Compare timestamps
 
-  const getTimeDifference = (timestamp) => {
-    const date = new Date(timestamp);
+  const getTimeDifference = (date) => {
     const timeDifference = now - date;
 
     const seconds = Math.floor(timeDifference / 1000);
@@ -37,5 +36,5 @@ console.log(time)
     }
   };
 
-  return <span style={{ color }}>{getTimeDifference(time)}</span>;
+  return <span style={{ color }}>{getTimeDifference(date)}</span>;
 };

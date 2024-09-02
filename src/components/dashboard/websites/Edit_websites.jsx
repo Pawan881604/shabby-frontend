@@ -22,7 +22,7 @@ import { Box, Stack } from "@mui/system";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useDispatch, useSelector } from "react-redux";
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import generateUuid from "../../../lib/Uuidv4";
 import { Image_uploader } from "../../../components/common/Image_uploader";
 import Image from "next/image";
@@ -57,9 +57,6 @@ export const Edit_websites = ({ open, setOpen, isvisible }) => {
       status: "Active",
     },
   });
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const onSubmit = async (data) => {
     if (!files && !isvisible) {
@@ -69,13 +66,11 @@ export const Edit_websites = ({ open, setOpen, isvisible }) => {
     if (isvisible) {
       const image = files ? files : website_details.image._id;
       dispatch(update_website(data, image, website_details.website_id));
-      handleClose();
+
       return;
     }
     const uuid = generateUuid();
     await dispatch(add_website(data, files, uuid));
-
-    handleClose();
   };
 
   useEffect(() => {
@@ -108,7 +103,7 @@ export const Edit_websites = ({ open, setOpen, isvisible }) => {
           open={open}
           TransitionComponent={Transition}
           keepMounted
-          onClose={handleClose}
+          onClose={() => setOpen(false)}
           className="add-cus"
           aria-describedby="alert-dialog-slide-description"
           PaperProps={{

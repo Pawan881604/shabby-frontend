@@ -152,6 +152,8 @@ const Page = () => {
               update_reset={UPDATE_WEBSITE_DETAILS_RESET}
               get_data={get_all_website}
               currentPage={currentPage}
+              filter_1={""}
+              setOpen={setOpen}
             />
           
           <Button
