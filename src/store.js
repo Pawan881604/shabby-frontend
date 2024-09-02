@@ -8,6 +8,7 @@ import {
   offer_reducer,
   offer_slider_reducer,
 } from "lib/redux/reducers/offer_reduer";
+import alertReducer from "lib/redux/reducers/alertReducer";
 
 const reducer = combineReducers({
   users: userReducer,
@@ -15,30 +16,11 @@ const reducer = combineReducers({
   website: website_reducer,
   offers_slider: offer_slider_reducer,
   offers: offer_reducer,
+  alert: alertReducer,
 });
 
 let inialState = {
-  // cart: {
-  //   cartItem: localStorage.getItem("cartItems")
-  //     ? JSON.parse(localStorage.getItem("cartItems"))
-  //     : [],
-  //   shippinginfo: localStorage.getItem("shippinginfo")
-  //     ? JSON.parse(localStorage.getItem("shippinginfo"))
-  //     : {},
-  // },
-  // wishList: {
-  //   wishL: localStorage.getItem("wishListItems")
-  //     ? JSON.parse(localStorage.getItem("wishListItems"))
-  //     : [],
-  // },
-  // wish: {
-  //   cartItem: localStorage.getItem("cartItems")
-  //     ? JSON.parse(localStorage.getItem("cartItems"))
-  //     : [],
-  //   shippingInfo: localStorage.getItem("shippinginfo")
-  //     ? JSON.parse(localStorage.getItem("shippinginfo"))
-  //     : {},
-  // },
+ 
 };
 
 const middleware = [thunk];

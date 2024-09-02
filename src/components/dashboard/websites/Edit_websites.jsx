@@ -8,8 +8,6 @@ import {
   OutlinedInput,
   Select,
   Typography,
-  TextField,
-  Alert,
 } from "@mui/material";
 import { PencilSimple } from "@phosphor-icons/react";
 import {
@@ -23,21 +21,15 @@ import {
 import { Box, Stack } from "@mui/system";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
-import { forwardRef, useEffect, useState } from "react";
-import { Alert_ } from "styles/theme/alert";
+import {  useEffect, useState } from "react";
 import generateUuid from "../../../lib/Uuidv4";
-
 import { Image_uploader } from "../../../components/common/Image_uploader";
-import { add_website, clearErrors, update_website } from "api/website";
-import {
-  ADD_WEBSITE_DETAILS_RESET,
-  UPDATE_WEBSITE_DETAILS_RESET,
-} from "lib/redux/constants/website_actionTypes";
 import Image from "next/image";
 import { getSiteURL } from "lib/get-site-url";
 import { Transition } from "lib/healper";
+import { showAlert } from "api/alert_action";
+import { add_website, update_website } from "api/website";
 
 const schema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -46,14 +38,7 @@ const schema = z.object({
   status: z.string().min(1, { message: "Status link is required" }),
 });
 
-export const Edit_websites = ({
-  open,
-  setOpen,
-  isvisible,
-  setAlertColor,
-  setShowAlert,
-  setAlertMessage,
-}) => {
+export const Edit_websites = ({ open, setOpen, isvisible }) => {
   const [files, setFiles] = useState(null);
   const [show_image, setshow_image] = useState(true);
   const dispatch = useDispatch();
@@ -78,9 +63,7 @@ export const Edit_websites = ({
 
   const onSubmit = async (data) => {
     if (!files && !isvisible) {
-      setShowAlert(true);
-      setAlertColor(false);
-      setAlertMessage("Add another one image");
+      dispatch(showAlert("Add another one image", "error"));
       return;
     }
     if (isvisible) {

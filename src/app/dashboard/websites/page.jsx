@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -16,148 +16,110 @@ import {
   UPDATE_WEBSITE_DETAILS_RESET,
 } from "lib/redux/constants/website_actionTypes";
 import { CircularProgress } from "@mui/material";
+import { showAlert } from "api/alert_action";
 
 const Page = () => {
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertColor, setAlertColor] = useState(true);
-  const [loadingStates, setLoadingStates] = useState({});
-  const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
+  const [loadingStates, setLoadingStates] = useState({});
+  const [row_Per_page, setrow_Per_page] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  console.log(currentPage)
+  const [open, setOpen] = useState(false);
+  const [isvisible, setIsvisible] = useState(false);
   const {
     loading,
-    website,
     count_website,
+    website,
     resultPerpage,
     success,
     update,
     error,
   } = useSelector((state) => state.website);
-  const [open, setOpen] = useState(false);
-  const [isvisible, setIsvisible] = useState(false);
 
   useEffect(() => {
-    dispatch(get_all_website());
-    if (error) {
-      setShowAlert(true);
-      setAlertColor(false);
-      setAlertMessage(error);
-      dispatch(clearErrors());
-    }
-    if (success) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("Website details Added successfully!");
-      dispatch({ type: ADD_WEBSITE_DETAILS_RESET });
-    }
-
-    if (update) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("Website details updated successfully!");
-      dispatch({ type: UPDATE_WEBSITE_DETAILS_RESET });
-    }
-  }, [dispatch, update, success, error]);
+    dispatch(get_all_website(currentPage));
+  }, [dispatch, currentPage, row_Per_page]);
 
   const get_single_website = async (website_id) => {
     setLoadingStates((prevState) => ({ ...prevState, [website_id]: true }));
-
     try {
       await dispatch(get_website_details(website_id));
       setOpen(true);
       setIsvisible(true);
     } catch (error) {
-      setShowAlert(true);
-      setAlertColor(false);
-      setAlertMessage(error);
+      dispatch(showAlert(error, "error"));
     } finally {
       setLoadingStates((prevState) => ({ ...prevState, [website_id]: false }));
     }
   };
 
-  const columns = [
-    {
-      field: "title",
-      headerName: "Title",
-      flex: 1,
-    },
-    {
-      field: "link",
-      headerName: "Website Url",
-      flex: 1,
-    },
-    {
-      field: "image",
-      headerName: "Image",
-      flex: 1,
-      renderCell: (params) => {
-        const imageUrl = `${getSiteURL()}${params.row.image}`;
-        return (
-          <>
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "title",
+        header: "Title",
+        size: 150,
+      },
+      {
+        accessorKey: "link",
+        header: "Website Url",
+        size: 150,
+      },
+      {
+        accessorKey: "image",
+        header: "Image",
+        size: 150,
+        Cell: ({ row }) => {
+          const imageUrl = `${getSiteURL()}${row.original.image.path}`;
+          return (
             <Image
               src={imageUrl}
               alt="Image"
-              width={50} // Adjust the width as per your requirement
-              height={50} // Adjust the height as per your requirement
-              objectFit="cover" // Optional, to control how the image fits within the dimensions
+              width={50}
+              height={50}
+              objectFit="cover"
             />
-          </>
-        );
+          );
+        },
       },
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      minWidth: 150,
-      maxWidth: 300,
-      flex: 1,
-      renderCell: (params) => {
-        const status = params.row.status;
-        return (
-          <div
-            style={{
-              color: status === "Active" ? "green" : "red",
-              fontWeight: 600,
-            }}
-          >
-            {status}
-          </div>
-        );
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 150,
+        Cell: ({ row }) => {
+          const status = row.original.status;
+          return (
+            <div
+              style={{
+                color: status === "Active" ? "green" : "red",
+                fontWeight: 600,
+              }}
+            >
+              {status}
+            </div>
+          );
+        },
       },
-    },
-    {
-      field: "action",
-      headerName: "Action",
-      type: "number",
-      flex: 1,
-      shortable: false,
-      renderCell: (params) => {
-        const isLoading = loadingStates[params.row.id] || false; // Get the loading state for this specific row
-        return (
-          <Button
-            onClick={() => get_single_website(params.row.id)}
-            color="secondary"
-            disabled={isLoading} // Disable only if this row is loading
-          >
-            {isLoading ? <CircularProgress size={24} /> : "Edit"}
-          </Button>
-        );
+      {
+        accessorKey: "action",
+        header: "Action",
+        size: 150,
+        Cell: ({ row }) => {
+          const isLoading = loadingStates[row.original.website_id] || false; // Get the loading state for this specific row
+          return (
+            <Button
+              onClick={() => get_single_website(row.original.website_id)}
+              color="secondary"
+              disabled={isLoading} // Disable only if this row is loading
+            >
+              {isLoading ? <CircularProgress size={24} /> : "Edit"}
+            </Button>
+          );
+        },
       },
-    },
-  ];
-
-  const rows = [];
-  if (Array.isArray(website)) {
-    website.forEach((item, i) => {
-      rows.push({
-        id: item.website_id,
-        title: item.title,
-        link: item.link,
-        image: item.image?.path,
-        // no_users: item.branch,
-        status: item.status,
-      });
-    });
-  }
+    ],
+    [loadingStates]
+  );
 
   const Show_form = () => {
     if (isvisible) {
@@ -167,29 +129,31 @@ const Page = () => {
     setIsvisible(false);
   };
 
+  const handlePageChange = (pageNumber) => {
+  
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <Stack spacing={3}>
-      <Edit_websites
-        open={open}
-        setAlertColor={setAlertColor}
-        setShowAlert={setShowAlert}
-        setAlertMessage={setAlertMessage}
-        setOpen={setOpen}
-        isvisible={isvisible}
-      />
+      <Edit_websites open={open} isvisible={isvisible} setOpen={setOpen}/>
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
           <Typography variant="h4">Website List</Typography>
         </Stack>
         <div>
-          {showAlert && (
+        
             <Alert_
-              status={alertColor ? "success" : "error"}
-              setShowAlert={setShowAlert}
-              alertMessage={alertMessage}
-              showAlert={showAlert}
+              success={success}
+              update={update}
+              error={error}
+              clearErrors={clearErrors}
+              add_reset={ADD_WEBSITE_DETAILS_RESET}
+              update_reset={UPDATE_WEBSITE_DETAILS_RESET}
+              get_data={get_all_website}
+              currentPage={currentPage}
             />
-          )}
+          
           <Button
             startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
             variant="contained"
@@ -199,14 +163,18 @@ const Page = () => {
           </Button>
         </div>
       </Stack>
-      {/* <CustomersFilters />*/}
+
       <Data_grid_table
-        rows={rows}
+        apidata={website && website}
         columns={columns}
         loading={loading}
-       
         totalPages={count_website}
         pageSize={resultPerpage}
+        currentPage={currentPage}
+        handlePageChange={handlePageChange}
+        row_Per_page={row_Per_page}
+        setrow_Per_page={setrow_Per_page}
+
       />
     </Stack>
   );

@@ -74,8 +74,8 @@ export const website_reducer = (
         ...state,
         loading: false,
         loading_: false,
-        website: null,
         update: null,
+        success: null,
         error: action.payload,
       };
     case UPDATE_WEBSITE_DETAILS_RESET:

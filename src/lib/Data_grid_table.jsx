@@ -1,49 +1,106 @@
-import { DataGrid } from "@mui/x-data-grid"; // Updated import for the latest DataGrid
-import { Box, CircularProgress } from "@mui/material";
-import React, { useState } from "react";
-import {Loadin_section} from "./Loadin_section";
+"use client";
+import { MaterialReactTable } from "material-react-table";
+import { Loadin_section } from "./Loadin_section";
+import { Paginations } from "./Paginations";
+import { useState } from "react";
+import {
+  Box,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 
-export const Data_grid_table = ({ rows, columns, loading }) => {
-  const [pageSize, setPageSize] = useState(10);
-  const [page, setPage] = useState(0);
-  const [selectedRows, setSelectedRows] = useState([]);
+export const Data_grid_table = ({
+  apidata,
+  columns,
+  loading,
+  totalPages,
+  pageSize,
+  currentPage,
+  handlePageChange,
+  row_Per_page,
+  setrow_Per_page,
+}) => {
+  const validRows = Array.isArray(apidata) ? apidata : [];
 
-  const handlePageSizeChange = (newPageSize) => {
-    setPageSize(newPageSize);
-    setPage(0); // Reset to the first page when page size changes
-  };
-
-  const handlePageChange = (newPage) => {
-    setPage(newPage); // Directly set the new page
-  };
-
-  const handleSelectionModelChange = (newSelection) => {
-    setSelectedRows(newSelection);
+  const handleChange = (event) => {
+    setrow_Per_page(event.target.value);
   };
 
   return (
     <>
       {loading ? (
-      <Loadin_section/>
+        <Loadin_section />
       ) : (
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          disableColumnMenu
-          pageSize={pageSize}
-          rowsPerPageOptions={[10, 20, 25, 50, 100]}
-          onPageSizeChange={handlePageSizeChange}
-          page={page}
-          onPageChange={(params) => handlePageChange(params.page)}
-          pagination
-          // checkboxSelection
-          className="product-list-table"
-          autoHeight
-          // onSelectionModelChange={handleSelectionModelChange}
-        />
+        <>
+          <MaterialReactTable
+            columns={columns}
+            data={validRows}
+            renderBottomToolbar={() => (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box>
+                  {/* <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                    <InputLabel id="demo-select-small-label">
+                      Row per page
+                    </InputLabel>
+                    <Select
+                      labelId="demo-select-small-label"
+                      id="demo-select-small"
+                      value={row_Per_page}
+                      label="Row per page"
+                      onChange={handleChange}
+                      inputProps={{
+                        sx: { fontSize: "12px" },
+                      }}
+                    >
+                      <MenuItem sx={{ fontSize: "12px" }} value={5}>
+                        5
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: "12px" }} value={10}>
+                        10
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: "12px" }} value={25}>
+                        25
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: "12px" }} value={50}>
+                        50
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: "12px" }} value={75}>
+                        75
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: "12px" }} value={100}>
+                        100
+                      </MenuItem>
+                    </Select>
+                  </FormControl> */}
+                </Box>
+                <Box>
+                  {pageSize<totalPages &&
+                  <Paginations
+                    totalItemsCount={totalPages}
+                    activePage={currentPage}
+                    itemsCountPerPage={pageSize}
+                    handlePageChange={handlePageChange}
+                  />}
+                </Box>
+                <Box>
+                  <Typography variant="h4">Total item {totalPages}</Typography>
+                </Box>
+              </Box>
+            )}
+          />
+        </>
       )}
     </>
   );
 };
-
-

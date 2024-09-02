@@ -122,3 +122,57 @@ background:#0d293c;
 .over-n-cus .MuiDataGrid-footerContainer{
   display:none !important;
 }
+
+/* Pagination container */
+.pagination-box {
+  display: flex;
+  justify-content: center; /* Center the pagination in the container */
+  margin: 0px 0px; /* Add some margin around the pagination */
+}
+
+/* Pagination items */
+.page-items {
+  display: inline-block;
+  margin: 0 0px; /* Space between pagination items */
+}
+
+/* Pagination links */
+.page-link {
+  display: inline-block;
+  padding: 8px 16px; /* Padding around the pagination links */
+  text-decoration: none; /* Remove underline from links */
+  color: #007bff; /* Link color */
+  border: 1px solid #ddd; /* Border around links */
+  border-radius: 4px; /* Rounded corners */
+  background-color: #fff; /* Background color */
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition for background and color */
+}
+
+/* Pagination links on hover */
+.page-link:hover {
+  background-color: #f1f1f1; /* Light background color on hover */
+  color: #0056b3; /* Darker link color on hover */
+}
+
+/* Active page item */
+.pageItemActive {
+  font-weight: bold; /* Bold text for active page */
+}
+
+/* Active link */
+.pageLinkActive {
+  background-color: #007bff; /* Background color for active page link */
+  color: #fff; /* Text color for active page link */
+}
+
+/* Next, Previous, First, and Last text */
+.pagination-box .page-link {
+  font-size: 14px; /* Font size for pagination text */
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .pagination-box {
+    font-size: 14px; /* Adjust font size on smaller screens */
+  }
+}

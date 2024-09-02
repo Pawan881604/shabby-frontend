@@ -64,21 +64,21 @@ export const update_website = (web_data, files, id) => async (dispatch) => {
   }
 };
 
-export const get_all_website = () => async (dispatch) => {
-  try {
-    dispatch({ type: FETCH_WEBSITE_REQUEST });
-    const { data } = await axiosInstance.get(
-      `${getSiteURL()}api/v1/websites`,
-      get_method()
-    );
-    dispatch({ type: FETCH_WEBSITE_SUCCESS, payload: data });
-  } catch (error) {
-    dispatch({
-      type: FETCH_WEBSITE_FAILURE,
-      payload: error.response.data.message,
-    });
-  }
-};
+export const get_all_website =
+  (currentPage = 1) =>
+  async (dispatch) => {
+    try {
+      dispatch({ type: FETCH_WEBSITE_REQUEST });
+      let link = `${getSiteURL()}api/v1/websites?page=${currentPage}`;
+      const { data } = await axiosInstance.get(link, get_method());
+      dispatch({ type: FETCH_WEBSITE_SUCCESS, payload: data });
+    } catch (error) {
+      dispatch({
+        type: FETCH_WEBSITE_FAILURE,
+        payload: error.response.data.message,
+      });
+    }
+  };
 
 export const get_website_details = (website_id) => async (dispatch) => {
   try {
