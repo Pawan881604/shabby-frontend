@@ -18,7 +18,7 @@ import {
 
 export const branch_reducer = (
   state = { branch: [], branch_details: {} },
-  action,
+  action
 ) => {
   switch (action.type) {
     case FETCH_BRANCH_REQUEST:
@@ -48,14 +48,12 @@ export const branch_reducer = (
         ...state,
         loading: false,
         update: true,
-        branch: action.payload.branch,
       };
     case ADD_BRANCH_DETAILS_SUCCESS:
       return {
         ...state,
         loading: false,
         success: true,
-        branch: action.payload.branch,
       };
     case FETCH_BRANCH_DETAILS_SUCCESS:
       return {
@@ -71,8 +69,6 @@ export const branch_reducer = (
         ...state,
         loading: false,
         loading_: false,
-        branch: null,
-        update: null,
         error: action.payload,
       };
     case UPDATE_BRANCH_DETAILS_RESET:
@@ -82,7 +78,7 @@ export const branch_reducer = (
         loading: false,
         success: null,
         update: null,
-        branch_details:null
+        branch_details: null,
       };
 
     case FETCH_BRANCH_ERROR:

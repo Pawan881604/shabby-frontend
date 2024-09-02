@@ -8,8 +8,6 @@ import {
   OutlinedInput,
   Select,
   Typography,
-  TextField,
-  Alert,
 } from "@mui/material";
 import {
   Button,
@@ -30,11 +28,6 @@ import { Alert_ } from "styles/theme/alert";
 import { add_branch, update_branch } from "../../../api/branchapi";
 import generateUuid from "../../../lib/Uuidv4";
 
-import {
-  ADD_BRANCH_DETAILS_RESET,
-  UPDATE_BRANCH_DETAILS_RESET,
-} from "lib/redux/constants/branch_actionTypes";
-
 const schema = z.object({
   link: z.string().min(1, { message: "Whatsapp link is required" }),
   branch: z.string().min(1, { message: "Branch is required" }),
@@ -45,17 +38,9 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_branch = ({
-  open,
-  setOpen,
-  isvisible,
-  setAlertColor,
-  alertColor,
-}) => {
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
+export const Edit_branch = ({ open, setOpen, isvisible }) => {
   const dispatch = useDispatch();
-  const { loading_, branch_details, success, update, error } = useSelector(
+  const { loading_, branch_details, success } = useSelector(
     (state) => state.branch
   );
   const {
@@ -68,37 +53,30 @@ export const Edit_branch = ({
     defaultValues: {
       link: "",
       branch: "",
-      status: "",
+      status: "Active",
     },
   });
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const onSubmit = async (data) => {
     if (isvisible) {
       dispatch(update_branch(data, branch_details.branch_id));
-      handleClose();
+
       return;
     }
     const uuid = generateUuid();
     await dispatch(add_branch(data, uuid));
-
-    handleClose();
   };
 
   useEffect(() => {
-    if (error) {
-      setShowAlert(true);
-      setAlertMessage(error);
-      setAlertColor(false);
-      dispatch(clearErrors());
-    }
-
     if (!isvisible) {
       setValue("link", "");
       setValue("branch", "");
-      setValue("status", "");
+      setValue("status", "Active");
+    }
+    if (success) {
+      setValue("link", "");
+      setValue("branch", "");
+      setValue("status", "Active");
     }
     if (branch_details) {
       setValue("link", branch_details.link || "");
@@ -108,19 +86,7 @@ export const Edit_branch = ({
         branch_details.branch === null ? "Not set" : branch_details.branch || ""
       );
     }
-    if (success) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("Branch details Added successfully!");
-      dispatch({ type: ADD_BRANCH_DETAILS_RESET });
-    }
-    if (update) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("Branch details updated successfully!");
-      dispatch({ type: UPDATE_BRANCH_DETAILS_RESET });
-    }
-  }, [branch_details, setValue, update, dispatch, error, success, isvisible]);
+  }, [branch_details, success, setValue, dispatch, isvisible]);
 
   return (
     <>
@@ -129,7 +95,7 @@ export const Edit_branch = ({
           open={open}
           TransitionComponent={Transition}
           keepMounted
-          onClose={handleClose}
+          onClose={() => setOpen(false)}
           className="add-cus"
           aria-describedby="alert-dialog-slide-description"
           PaperProps={{
@@ -152,14 +118,6 @@ export const Edit_branch = ({
               <Loadin_section />
             ) : (
               <form onSubmit={handleSubmit(onSubmit)}>
-                {showAlert && (
-                  <Alert_
-                    status={alertColor ? "success" : "error"}
-                    setShowAlert={setShowAlert}
-                    alertMessage={alertMessage}
-                    showAlert={showAlert}
-                  />
-                )}
                 <Stack spacing={2}>
                   <Controller
                     control={control}
@@ -192,7 +150,6 @@ export const Edit_branch = ({
                   <Controller
                     control={control}
                     name="branch"
-                    // disabled={true}
                     render={({ field }) => (
                       <FormControl
                         sx={{ marginTop: "13px" }}

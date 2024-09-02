@@ -23,7 +23,7 @@ const Page = () => {
   const [loadingStates, setLoadingStates] = useState({});
   const [row_Per_page, setrow_Per_page] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  console.log(currentPage)
+
   const [open, setOpen] = useState(false);
   const [isvisible, setIsvisible] = useState(false);
   const {
