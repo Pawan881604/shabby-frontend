@@ -1,30 +1,15 @@
 import { Box, Grid, List, ListItemButton, ListItemText } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Tab_containor } from "./Tab_containor";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { get_all_offer_slider } from "api/offerapi";
-import {
-  ADD_OFFER_SLIDER_DETAILS_RESET,
-  UPDATE_OFFER_SLIDER_DETAILS_RESET,
-} from "lib/redux/constants/offer_actionTypes";
 
 export const Tabs = () => {
   const dispatch = useDispatch();
   const [index, setindex] = useState(1);
-  const { success, update } = useSelector((state) => state.offers_slider);
-
   useEffect(() => {
-    dispatch(get_all_offer_slider());
-    if (success) {
-      dispatch(get_all_offer_slider());
-      setindex(2);
-      dispatch({ type: ADD_OFFER_SLIDER_DETAILS_RESET });
-    }
-    if (update) {
-      dispatch(get_all_offer_slider());
-      dispatch({ type: UPDATE_OFFER_SLIDER_DETAILS_RESET });
-    }
-  }, [success, dispatch, update]);
+    dispatch(get_all_offer_slider(1));
+  }, [dispatch]);
 
   return (
     <Grid

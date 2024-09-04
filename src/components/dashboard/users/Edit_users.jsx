@@ -71,12 +71,10 @@ export const Edit_users = ({ open, setOpen, isvisible }) => {
   const onSubmit = async (data) => {
     if (isvisible) {
       dispatch(update_admin_user(data, user_details.user_id));
-      handleClose();
       return;
     }
     const uuid = generateUuid();
     dispatch(ADD_user(data, uuid));
-    handleClose();
   };
 
   useEffect(() => {
@@ -84,7 +82,7 @@ export const Edit_users = ({ open, setOpen, isvisible }) => {
       setValue("email", "");
       setValue("password", "");
       setValue("name", "");
-      setValue("status", "");
+      setValue("status", "Active");
       setValue("role", "");
     }
     if (user_details) {
@@ -235,10 +233,10 @@ export const Edit_users = ({ open, setOpen, isvisible }) => {
                             },
                           }}
                         >
-                          <MenuItem value="Admin" sx={{ fontSize: "12px" }}>
+                          <MenuItem value="admin" sx={{ fontSize: "12px" }}>
                             Admin
                           </MenuItem>
-                          <MenuItem value="Manager" sx={{ fontSize: "12px" }}>
+                          <MenuItem value="manager" sx={{ fontSize: "12px" }}>
                             Manager
                           </MenuItem>
                         </Select>

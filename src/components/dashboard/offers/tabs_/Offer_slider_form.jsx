@@ -18,8 +18,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import generateUuid from "lib/Uuidv4";
 import { Image_uploader } from "components/common/Image_uploader";
-import { add_offer_slider, clearErrors } from "api/offerapi";
+import {
+  add_offer_slider,
+  clearErrors,
+  get_all_offer_slider,
+} from "api/offerapi";
 import { Alert_ } from "styles/theme/alert";
+import {
+  ADD_OFFER_SLIDER_DETAILS_RESET,
+  UPDATE_OFFER_SLIDER_DETAILS_RESET,
+} from "lib/redux/constants/offer_actionTypes";
+import { showAlert } from "api/alert_action";
 
 const schema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -28,11 +37,9 @@ const schema = z.object({
 
 export const Offer_slider_form = () => {
   const [files, setFiles] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertColor, setAlertColor] = useState(true);
-  const [alertMessage, setAlertMessage] = useState("");
+  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
-  const { error, update_loading, success } = useSelector(
+  const { error, update_loading, update, success } = useSelector(
     (state) => state.offers_slider
   );
 
@@ -51,9 +58,7 @@ export const Offer_slider_form = () => {
 
   const onSubmit = async (data) => {
     if (!files) {
-      setShowAlert(true);
-      setAlertMessage("Remove and add another image");
-      setAlertColor(false);
+      dispatch(showAlert("Add another one image", "error"));
       return;
     }
     const uuid = generateUuid();
@@ -61,34 +66,27 @@ export const Offer_slider_form = () => {
   };
 
   useEffect(() => {
-    if (error) {
-      setShowAlert(true);
-      setAlertMessage(error);
-      setAlertColor(false);
-      dispatch(clearErrors());
-    }
-
     if (success) {
-      setShowAlert(true);
-      setAlertColor(true);
       setValue("title", "");
       setFiles(null);
-      setValue("status", "Active");
-      setAlertMessage("Slider Added successfully!");
     }
-  }, [setValue, dispatch, error, success, files]);
+  }, [setValue, dispatch, success, files]);
 
   return (
     <>
       <Box>
-        {showAlert && (
-          <Alert_
-            status={alertColor ? "success" : "error"}
-            setShowAlert={setShowAlert}
-            alertMessage={alertMessage}
-            showAlert={showAlert}
-          />
-        )}
+        <Alert_
+          success={success}
+          update={update}
+          error={error}
+          clearErrors={clearErrors}
+          add_reset={ADD_OFFER_SLIDER_DETAILS_RESET}
+          update_reset={UPDATE_OFFER_SLIDER_DETAILS_RESET}
+          get_data={get_all_offer_slider}
+          currentPage={1}
+          filter_1={""}
+          setOpen={setOpen}
+        />
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container>
             <Grid

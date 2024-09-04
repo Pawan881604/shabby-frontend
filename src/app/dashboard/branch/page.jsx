@@ -38,7 +38,7 @@ const Page = () => {
     update,
     error,
   } = useSelector((state) => state.branch);
-console.log(error)
+
   useEffect(() => {
     dispatch(get_all_branch(currentPage));
   }, [dispatch, currentPage]);

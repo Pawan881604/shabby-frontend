@@ -46,9 +46,9 @@ export default function Page() {
       {/* <Grid lg={4} md={6} xs={12}>
         <Traffic chartSeries={[63, 15, 22]} labels={['Desktop', 'Tablet', 'Phone']} sx={{ height: '100%' }} />
       </Grid> */}
-      <Grid lg={12} md={12} xs={12}>
+      {/* <Grid lg={12} md={12} xs={12}>
         <NewCustomers sx={{ height: "100%" }} />
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 }

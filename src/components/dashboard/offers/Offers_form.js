@@ -8,10 +8,11 @@ import {
   OutlinedInput,
   Select,
   Typography,
-  TextField,
   Paper,
   Chip,
-  Autocomplete,
+  List,
+  ListItemButton,
+  ListItemText,
 } from "@mui/material";
 import { PencilSimple } from "@phosphor-icons/react";
 import {
@@ -25,17 +26,17 @@ import Slide from "@mui/material/Slide";
 import { Box, Stack } from "@mui/system";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
 import { forwardRef, useEffect, useMemo, useState } from "react";
-import { Alert_ } from "styles/theme/alert";
 import generateUuid from "../../../lib/Uuidv4";
 
 import { Image_uploader } from "../../../components/common/Image_uploader";
 
 import Image from "next/image";
 import { getSiteURL } from "lib/get-site-url";
-import { add_offer, get_offer_details } from "api/offerapi";
+import { add_offer, get_offer_details, update_offer } from "api/offerapi";
+import { get_all_users, search_all_user } from "api/authapi";
+import { showAlert } from "api/alert_action";
 
 const schema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -48,25 +49,18 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Offers_form = ({
-  open,
-  setOpen,
-  isvisible,
-  setShowAlert,
-  setAlertColor,
-  setAlertMessage,
-}) => {
+export const Offers_form = ({ open, setOpen, isvisible }) => {
   const [chipData, setChipData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const dispatch = useDispatch();
+  const [imgae_id, setImage_id] = useState([]);
   const [files, setFiles] = useState(null);
   const [show_image, setshow_image] = useState(true);
-  const [imgae_url, setimage_url] = useState(null);
-
-  const dispatch = useDispatch();
   const { offer_data, success, offer_details } = useSelector(
     (state) => state.offers
   );
-  const { user } = useSelector((state) => state.users);
 
+  const { search_data } = useSelector((state) => state.search);
   const {
     control,
     handleSubmit,
@@ -82,49 +76,23 @@ export const Offers_form = ({
       valid_date: new Date().toISOString().slice(0, 10),
     },
   });
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const onSubmit = async (data) => {
-    const ids = chipData && chipData.map((item) => item.id);
-    if (!files) {
-      setShowAlert(true);
-      setAlertColor(false);
-      setAlertMessage("Add another one image");
-      return;
-    }
-    // if (isvisible) {
-    //   const image = files ? files : imgae_url;
-
-    //   // dispatch(get_offer_details(data, image, offer_data.website_id));
-    //   handleClose();
-    //   return;
-    // }
-    const uuid = generateUuid();
-    await dispatch(add_offer(data, ids, files, uuid));
-
-    handleClose();
-  };
 
   useEffect(() => {
     if (!isvisible) {
       setValue("title", "");
       setValue("discription", "");
       setValue("status", "Active");
-
       setValue("valid_date", new Date().toISOString().slice(0, 10));
       setFiles(null);
-      setimage_url(null);
+      setImage_id(null);
     }
     if (success) {
       setValue("title", "");
       setValue("discription", "");
       setValue("status", "Active");
-
       setFiles(null);
-      setChipData(null);
-      setimage_url(null);
+      setChipData([]);
+      setImage_id(null);
     }
     if (offer_details) {
       let validDate = offer_details.valid_date;
@@ -145,41 +113,53 @@ export const Offers_form = ({
       setValue("title", offer_details.title || "");
       setValue("discription", offer_details.discription || "");
       setValue("status", offer_details.status || "");
-      setimage_url(offer_details.image?.path || "");
+      setChipData(offer_details.applicable_users || []);
+      setImage_id(offer_details.image?._id);
     }
   }, [offer_details, setValue, success, dispatch, isvisible]);
 
-  const handleDelete = (ChipData) => () => {
-    setChipData((chips) => chips.filter((chip) => chip.id !== ChipData.id));
+  const handleClose = () => {
+    setOpen(false);
   };
 
-  const user_onchange_handler = (e, newValue) => {
-    const exists = chipData.some((item) => item.id === newValue.id);
-
-    if (!exists) {
-      setChipData((prev) => [newValue, ...prev]);
+  const onSubmit = async (data) => {
+    const ids = chipData && chipData.map((item) => item._id);
+    
+    if (!files  && !isvisible) {
+      dispatch(showAlert("Add another one image", "error"));
+      return;
     }
-  };
-
-  const active_users = Array.isArray(user)
-    ? user
-        .filter((item) => item.role === "user" && item.status === "Active")
-        .map((item) => ({ id: item._id, name: item.phone_number }))
-    : [];
-
-  useMemo(() => {
-    if (user && Array.isArray(offer_details?.applicable_users)) {
-      const d = user
-        .filter((item) => offer_details.applicable_users.includes(item._id))
-        // .map((item) => ({ id: item.user, name: user.branch }));
-      console.log(d);
-      setChipData(
-        user
-          .filter((item) => offer_details.applicable_users.includes(item._id))
-          .map((item) => ({ id: item.user, name: user.branch }))
+    if (isvisible) {
+      const image = files ? files : offer_details.image._id;
+      
+      dispatch(
+        update_offer(data, ids, image, offer_details._id)
       );
+      return;
     }
-  }, [user]);
+    const uuid = generateUuid();
+    await dispatch(add_offer(data, ids, files, uuid));
+  };
+
+  const handleInputChange = (event) => {
+    const trimmedValue = event.target.value.trim();
+    setSearchQuery(trimmedValue);
+    dispatch(search_all_user(1, "user", trimmedValue));
+  };
+  const handleDelete = (chipToDelete) => {
+    setChipData((chips) =>
+      chips.filter((chip) => chip._id !== chipToDelete._id)
+    );
+  };
+  const get_user_id = (data) => {
+    setChipData((prev) => {
+      const isExist = prev.some((item) => item._id === data._id);
+      if (!isExist) {
+        return [data, ...prev];
+      }
+      return prev;
+    });
+  };
 
   return (
     <>
@@ -294,61 +274,90 @@ export const Offers_form = ({
                   )}
                 />
               </Stack>
-              <Paper
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: "5px",
-                  listStyle: "none",
-                  maxWidth: "350px",
-                  p: 0.8,
-                }}
-                component="div"
-              >
-                {chipData &&
-                  chipData.map((data) => (
-                    <Chip
-                      key={data.id}
-                      label={data.name}
-                      onDelete={
-                        data.label === "React" ? undefined : handleDelete(data)
-                      }
-                    />
-                  ))}
-              </Paper>
-
-              <Box sx={{ width: "100%" }}>
-                <Autocomplete
-                  sx={{ width: "100%" }}
-                  autoHighlight
-                  options={active_users}
-                  getOptionLabel={(option) => option?.name || ""} // Handle missing or undefined name
-                  onChange={(event, newValue) =>
-                    user_onchange_handler(event, newValue)
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      InputLabelProps={{
-                        style: { fontSize: "13px", top: "-6px" },
-                      }}
-                      label="Optional"
-                      inputProps={{
-                        ...params.inputProps,
-                        style: {
-                          padding: "2px 4px", // Adjust padding as needed
-                          fontSize: "12px", // Ensure the font size matches the above for consistency
-                        },
-                      }}
-                    />
-                  )}
-                  ListboxProps={{
-                    sx: {
-                      fontSize: "12px", // Set the font size for the options
-                    },
+              <Stack spacing={2}>
+                <Paper
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "5px",
+                    listStyle: "none",
+                    maxWidth: "350px",
+                    p: 0.8,
                   }}
-                />
-              </Box>
+                  component="div"
+                >
+                  {search_data &&
+                    search_data.map((data) => (
+                      <Chip
+                        key={data._id}
+                        label={data.phone_number}
+                        onDelete={() => handleDelete(data)}
+                      />
+                    ))}
+                </Paper>
+
+                <Box sx={{ width: "100%" }}>
+                  <FormControl sx={{ marginTop: "13px", width: "100%" }}>
+                    <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                      Search user
+                    </InputLabel>
+                    <OutlinedInput
+                      inputProps={{
+                        style: { padding: "10px", fontSize: "12px" },
+                      }}
+                      label=" Search user"
+                      type="search"
+                      value={searchQuery}
+                      onChange={handleInputChange}
+                    />
+                  </FormControl>
+                  {search_data.length > 0 ? (
+                    <Box
+                      sx={{
+                        width: "100%",
+                        maxWidth: 360,
+                        bgcolor: "background.paper",
+                        overflowY: "scroll",
+                        maxHeight: "350px",
+                      }}
+                    >
+                      <List
+                        sx={{
+                          width: "100%",
+                          maxWidth: 360,
+                          fontSize: "12px !important",
+                          bgcolor: "background.paper",
+                        }}
+                        component="nav"
+                        aria-labelledby="nested-list-subheader"
+                      >
+                        {search_data.map((item, i) => (
+                          <ListItemButton
+                            style={{ fontSize: "12px ", padding: "2px 10px" }}
+                            key={i}
+                            onClick={() => get_user_id(item)}
+                          >
+                            <ListItemText
+                              secondary={
+                                <Typography
+                                  component="span"
+                                  variant="body2"
+                                  sx={{
+                                    color: "text.primary",
+                                    display: "inline",
+                                  }}
+                                >
+                                  {item.phone_number}
+                                </Typography>
+                              }
+                            />
+                          </ListItemButton>
+                        ))}
+                      </List>
+                    </Box>
+                  ) : null}
+                </Box>
+              </Stack>
               <Stack spacing={2}>
                 <Controller
                   control={control}
@@ -392,7 +401,9 @@ export const Offers_form = ({
                     {show_image ? (
                       <div>
                         <Image
-                          src={`${getSiteURL()}${offer_data?.image || ""}`}
+                          src={`${getSiteURL()}${
+                            offer_details?.image?.path || ""
+                          }`}
                           alt="Image"
                           width={100} // Adjust the width as per your requirement
                           height={100} // Adjust the height as per your requirement

@@ -1,11 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Plus as PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 import { useDispatch, useSelector } from "react-redux";
-import { get_all_users, get_user_details } from "../../../api/authapi";
+import { get_all_users } from "../../../api/authapi";
 import { Data_grid_table } from "../../../lib/Data_grid_table.jsx";
 import { Alert_ } from "styles/theme/alert";
 import { Offers_form } from "./Offers_form";
@@ -17,48 +17,48 @@ import {
 import { getSiteURL } from "lib/get-site-url";
 import Image from "next/image";
 import TimeAndDate from "lib/Date_formet";
+import { CircularProgress } from "@mui/material";
+import { showAlert } from "api/alert_action";
 
 export const Offers = () => {
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertColor, setAlertColor] = useState(true);
-  const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
-  const { loading, offer_data, success, update, error } = useSelector(
-    (state) => state.offers
-  );
+  const [loadingStates, setLoadingStates] = useState({});
+  const [row_Per_page, setrow_Per_page] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [open, setOpen] = useState(false);
-  const [isvisible, setIsvisible] = useState(true);
+  const [isvisible, setIsvisible] = useState(false);
+  const {
+    loading,
+    offer_data,
+    total_count,
+    resultPerpage,
+    success,
+    update,
+    error,
+  } = useSelector((state) => state.offers);
 
   useEffect(() => {
-    dispatch(get_all_users());
-    dispatch(get_all_offer());
-    if (error) {
-      setShowAlert(true);
-      setAlertColor(false);
-      setAlertMessage(error);
-      dispatch(clearErrors());
-    }
-    if (success) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("Offer added successfully!");
-      dispatch(get_all_offer());
-      dispatch({ type: ADD_OFFER_DETAILS_RESET });
-    }
-    if (update) {
-      setShowAlert(true);
-      setAlertColor(true);
-      setAlertMessage("User details updated successfully!");
-      dispatch({ type: UPDATE_OFFER_DETAILS_RESET });
-    }
-  }, [dispatch, error, success, update]);
 
-  const get_single_user = async (user_id) => {
-    await dispatch(get_offer_details(user_id));
+    dispatch(get_all_offer());
+  }, [dispatch]);
+
+  const get_single_offer = async (offer_id) => {
+    setLoadingStates((prevState) => ({ ...prevState, [offer_id]: true }));
+
+    try {
+      await dispatch(get_offer_details(offer_id));
+      setOpen(true);
+      setIsvisible(true);
+    } catch (error) {
+      dispatch(showAlert(error, "error"));
+    } finally {
+      setLoadingStates((prevState) => ({ ...prevState, [offer_id]: false }));
+    }
     setOpen(true);
     setIsvisible(true);
   };
+
   const Show_form = () => {
     if (isvisible) {
       dispatch({ type: UPDATE_OFFER_DETAILS_RESET });
@@ -66,124 +66,115 @@ export const Offers = () => {
     setOpen(true);
     setIsvisible(false);
   };
-  const columns = [
-    {
-      field: "title",
-      headerName: "Title",
-      flex: 1,
-    },
-    {
-      field: "discription",
-      headerName: "Discription",
-      flex: 1,
-    },
 
-    {
-      field: "valid_date",
-      headerName: "Valid",
-      flex: 1,
-      renderCell: (params) => {
-        const date = params.row.valid_date;
-        return (
-          <div>
-            <TimeAndDate time={date} />
-          </div>
-        );
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "title",
+        header: "Title",
+        size: 150,
       },
-    },
-    {
-      field: "image",
-      headerName: "Image",
-      flex: 1,
-      renderCell: (params) => {
-        const imageUrl = `${getSiteURL()}${params.row.image}`;
-        return (
-          <>
-            <Image
-              src={imageUrl}
-              alt="Image"
-              width={50}
-              height={50}
-              objectFit="cover"
-            />
-          </>
-        );
+      {
+        accessorKey: "discription",
+        header: "Discription Url",
+        size: 150,
       },
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      minWidth: 150,
-      maxWidth: 300,
-      flex: 1,
-      renderCell: (params) => {
-        const status = params.row.status;
-        return (
-          <div
-            style={{
-              color: status === "Active" ? "green" : "red",
-              fontWeight: 600,
-            }}
-          >
-            {status}
-          </div>
-        );
+      {
+        accessorKey: "valid_date",
+        header: "Validity date",
+        size: 150,
+        Cell: ({ row }) => {
+          const date = row.original.valid_date;
+          return (
+            <div>
+              <TimeAndDate time={date} />
+            </div>
+          );
+        },
       },
-    },
-
-    {
-      field: "action",
-      headerName: "Action",
-      type: "number",
-      flex: 1,
-      shortable: false,
-      renderCell: (params) => {
-        return (
-          <>
-            <Button onClick={() => get_single_user(params.row.id)}>Edit</Button>
-          </>
-        );
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 150,
+        Cell: ({ row }) => {
+          const status = row.original.status;
+          return (
+            <div
+              style={{
+                color: status === "Active" ? "green" : "red",
+                fontWeight: 600,
+              }}
+            >
+              {status}
+            </div>
+          );
+        },
       },
-    },
-  ];
-
-  const rows = [];
-  if (Array.isArray(offer_data)) {
-    offer_data.forEach((item, i) => {
-      rows.push({
-        id: item.offer_id,
-        title: item.title,
-        discription: item.discription,
-        valid_date: item.valid_date,
-        image: item.image && item.image.path,
-        status: item.status,
-      });
-    });
-  }
+      {
+        accessorKey: "image",
+        header: "Image",
+        size: 150,
+        Cell: ({ row }) => {
+          const imageUrl = `${getSiteURL()}${row.original.image.path}`;
+          return (
+            <div>
+              <Image
+                src={imageUrl}
+                alt="Image"
+                width={50}
+                height={50}
+                objectFit="cover"
+              />
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "action",
+        header: "Action",
+        size: 150,
+        Cell: ({ row }) => {
+          const isLoading = loadingStates[row.original.offer_id] || false; // Get the loading state for this specific row
+          return (
+            <Button
+              onClick={() => get_single_offer(row.original.offer_id)}
+              color="secondary"
+              disabled={isLoading} // Disable only if this row is loading
+            >
+              {isLoading ? <CircularProgress size={24} /> : "Edit"}
+            </Button>
+          );
+        },
+      },
+    ],
+    [loadingStates]
+  );
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <Stack spacing={3}>
-      <Offers_form
-        open={open}
-        isvisible={isvisible}
-        setOpen={setOpen}
-        setShowAlert={setShowAlert}
-        setAlertColor={setAlertColor}
-        setAlertMessage={setAlertMessage}
-      />
+      <Offers_form open={open} isvisible={isvisible} setOpen={setOpen} />
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
           <Typography variant="h4">Offers List</Typography>
         </Stack>
+
         <div>
-          {showAlert && (
-            <Alert_
-              status={alertColor ? "success" : "error"}
-              setShowAlert={setShowAlert}
-              alertMessage={alertMessage}
-              showAlert={showAlert}
-            />
-          )}
+          <Alert_
+            success={success}
+            update={update}
+            error={error}
+            clearErrors={clearErrors}
+            add_reset={ADD_OFFER_DETAILS_RESET}
+            update_reset={UPDATE_OFFER_DETAILS_RESET}
+            get_data={get_all_offer}
+            currentPage={currentPage}
+            filter_1={""}
+            filter_2={""}
+            setOpen={setOpen}
+          />
           <Button
             startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
             variant="contained"
@@ -194,7 +185,17 @@ export const Offers = () => {
         </div>
       </Stack>
 
-      <Data_grid_table rows={rows} columns={columns} loading={loading} />
+      <Data_grid_table
+        apidata={offer_data && offer_data}
+        columns={columns}
+        loading={loading}
+        totalPages={total_count}
+        pageSize={resultPerpage}
+        currentPage={currentPage}
+        handlePageChange={handlePageChange}
+        row_Per_page={row_Per_page}
+        setrow_Per_page={setrow_Per_page}
+      />
     </Stack>
   );
 };

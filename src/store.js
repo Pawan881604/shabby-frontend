@@ -9,6 +9,7 @@ import {
   offer_slider_reducer,
 } from "lib/redux/reducers/offer_reduer";
 import alertReducer from "lib/redux/reducers/alertReducer";
+import { search_reducer } from "lib/redux/reducers/searchReducer";
 
 const reducer = combineReducers({
   users: userReducer,
@@ -17,6 +18,7 @@ const reducer = combineReducers({
   offers_slider: offer_slider_reducer,
   offers: offer_reducer,
   alert: alertReducer,
+  search:search_reducer,
 });
 
 let inialState = {

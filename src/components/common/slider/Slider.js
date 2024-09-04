@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Navigation } from "swiper/modules";
@@ -8,13 +8,23 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Box, CircularProgress, Container } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getSiteURL } from "lib/get-site-url";
 import { Loadin_section } from "lib/Loadin_section";
+import { Paginations } from "lib/Paginations";
+import { get_all_offer_slider } from "api/offerapi";
 
 export const Carousel = () => {
-  const { loading, offer_slider } = useSelector((state) => state.offers_slider);
+  const [currentPage, setCurrentPage] = useState(1);
+  const dispatch = useDispatch();
+  const { loading, total_count, resultPerpage, offer_slider } = useSelector(
+    (state) => state.offers_slider
+  );
 
+  const handlePageChange = (pageNumber) => {
+    dispatch(get_all_offer_slider(pageNumber));
+    setCurrentPage(pageNumber);
+  };
   return (
     <>
       <Container maxWidth="lg">
@@ -36,25 +46,34 @@ export const Carousel = () => {
               <Loadin_section />
             ) : (
               offer_slider &&
-              offer_slider.filter(item=>item.status==='Active')
-              .map((item, i) => (
-                <SwiperSlide key={i}>
-                  <Box
-                    component="img"
-                    alt={item.title}
-                    src={`${getSiteURL()}${item.image && item.image.path}`}
-                    sx={{
-                      height: "400px",
-                      width: "100%",
-                      objectFit: "cover", 
-                      objectPosition: "center", 
-                    }}
-                  />
-                </SwiperSlide>
-              ))
+              offer_slider
+                .filter((item) => item.status === "Active")
+                .map((item, i) => (
+                  <SwiperSlide key={i}>
+                    <Box
+                      component="img"
+                      alt={item.title}
+                      src={`${getSiteURL()}${item.image && item.image.path}`}
+                      sx={{
+                        height: "400px",
+                        width: "100%",
+                        objectFit: "cover",
+                        objectPosition: "center",
+                      }}
+                    />
+                  </SwiperSlide>
+                ))
             )}
           </Swiper>
         </Box>
+        {resultPerpage < total_count && (
+          <Paginations
+            totalItemsCount={total_count}
+            activePage={currentPage}
+            itemsCountPerPage={resultPerpage}
+            handlePageChange={handlePageChange}
+          />
+        )}
       </Container>
     </>
   );

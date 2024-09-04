@@ -4,14 +4,15 @@ import {
   FormControl,
   FormHelperText,
   InputLabel,
+  MenuItem,
   OutlinedInput,
+  Select,
   Typography,
-  Autocomplete,
-  TextField,
   Paper,
   Chip,
-  Select,
-  MenuItem,
+  List,
+  ListItemButton,
+  ListItemText,
 } from "@mui/material";
 import {
   Button,
@@ -28,8 +29,9 @@ import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import { add_normal_user, clearErrors, update_user } from "api/authapi";
-import { get_all_branch } from "../../../api/branchapi";
+import { get_all_branch, search_all_branch } from "../../../api/branchapi";
 import generateUuid from "lib/Uuidv4";
+import Search_list from "components/common/search-list/Search_list";
 
 const schema = z.object({
   phone: z
@@ -42,11 +44,14 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-export const Edit_customer = ({ open,  isvisible ,setOpen}) => {
-  const [chipData, setChipData] = useState([]);
-
-  const { branch } = useSelector((state) => state.branch);
+export const Edit_customer = ({ open, isvisible, setOpen }) => {
   const dispatch = useDispatch();
+  const [chipData, setChipData] = useState([]);
+  const [branchData, setBranchData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { search_data } = useSelector((state) => state.search);
+
   const { loading_: user_details_loading, user_details } = useSelector(
     (state) => state.users
   );
@@ -63,31 +68,7 @@ export const Edit_customer = ({ open,  isvisible ,setOpen}) => {
     },
   });
 
-  const onSubmit = async (data) => {
-    if (isvisible) {
-      dispatch(update_user(data, chipData, user_details.user_id));
-
-      return;
-    }
-    const uuid = generateUuid();
-    dispatch(add_normal_user(data, chipData, uuid));
-  };
-
-  const handleDelete = (ChipData) => () => {
-    setChipData((chips) => chips.filter((chip) => chip.id !== ChipData.id));
-  };
-  const branch_onchange_handler = (e, newValue) => {
-    const exists = chipData.some((item) => item.id === newValue.id);
-
-    if (!exists) {
-      // Add the newValue to chipData only if its id does not exist
-      setChipData((prev) => [newValue, ...prev]);
-    } // Add the selected value to the array
-  };
-
   useEffect(() => {
-    dispatch(get_all_branch());
-
     if (!isvisible) {
       setValue("phone", "+91");
       setValue("status", "Active");
@@ -99,17 +80,42 @@ export const Edit_customer = ({ open,  isvisible ,setOpen}) => {
       setValue("status", user_details.status || "");
       setChipData(
         user_details.branch &&
-          user_details.branch.map((item) => ({
-            id: item._id,
-            name: item.branch,
-          }))
+          user_details.branch
       );
     }
   }, [user_details, setValue, dispatch, isvisible]);
 
-  const branches = branch
-    ? branch.map((item) => ({ id: item._id, name: item.branch }))
-    : [];
+  const onSubmit = async (data) => {
+    const ids = chipData && chipData.map((item) => item._id);
+
+    if (isvisible) {
+      dispatch(update_user(data, ids, user_details.user_id));
+
+      return;
+    }
+    const uuid = generateUuid();
+    dispatch(add_normal_user(data, ids, uuid));
+  };
+
+  const handleInputChange = (event) => {
+    const trimmedValue = event.target.value;
+    setSearchQuery(trimmedValue);
+    dispatch(search_all_branch(1, trimmedValue));
+  };
+  const handleDelete = (chipToDelete) => {
+    setChipData((chips) =>
+      chips.filter((chip) => chip._id !== chipToDelete._id)
+    );
+  };
+  const get_branch_id = (data) => {
+    setChipData((prev) => {
+      const isExist = prev.some((item) => item._id === data._id);
+      if (!isExist) {
+        return [data, ...prev];
+      }
+      return prev;
+    });
+  };
 
   return (
     <>
@@ -118,7 +124,7 @@ export const Edit_customer = ({ open,  isvisible ,setOpen}) => {
           open={open}
           TransitionComponent={Transition}
           keepMounted
-          onClose={()=> setOpen(false)}
+          onClose={() => setOpen(false)}
           className="add-cus"
           aria-describedby="alert-dialog-slide-description"
           PaperProps={{
@@ -172,58 +178,89 @@ export const Edit_customer = ({ open,  isvisible ,setOpen}) => {
                   />
                 </Stack>
 
-                <Paper
-                  sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "5px",
-                    listStyle: "none",
-                    maxWidth: "350px",
-                    p: 0.8,
-                  }}
-                  component="div"
-                >
-                  {chipData &&
-                    chipData.map((data) => (
-                      <Chip
-                        key={data._id}
-                        label={data.name}
-                        onDelete={
-                          data.label === "React"
-                            ? undefined
-                            : handleDelete(data)
-                        }
-                      />
-                    ))}
-                </Paper>
-
-                <Box sx={{ width: "100%" }}>
-                  <Autocomplete
-                    sx={{ width: "100%" }}
-                    autoHighlight
-                    options={branches}
-                    getOptionLabel={(option) => option?.name || ""} // Handle missing or undefined name
-                    onChange={(event, newValue) =>
-                      branch_onchange_handler(event, newValue)
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        InputLabelProps={{
-                          style: { fontSize: "13px", top: "-6px" },
-                        }}
-                        label="Choose branch"
+                <Stack spacing={2}>
+                  <Paper
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "5px",
+                      listStyle: "none",
+                      maxWidth: "350px",
+                      p: 0.8,
+                    }}
+                    component="div"
+                  >
+                    {chipData &&
+                      chipData.map((data) => (
+                        <Chip
+                          key={data._id}
+                          label={data.branch}
+                          onDelete={() => handleDelete(data)}
+                        />
+                      ))}
+                  </Paper>
+                  <Box sx={{ width: "100%" }}>
+                    <FormControl sx={{ marginTop: "13px", width: "100%" }}>
+                      <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
+                        Search user
+                      </InputLabel>
+                      <OutlinedInput
                         inputProps={{
-                          ...params.inputProps,
-                          style: {
-                            padding: "2px 4px", // Adjust padding as needed
-                            fontSize: "12px", // Ensure the font size matches the above for consistency
-                          },
+                          style: { padding: "10px", fontSize: "12px" },
                         }}
+                        label=" Search user"
+                        type="search"
+                        value={searchQuery}
+                        onChange={handleInputChange}
                       />
-                    )}
-                  />
-                </Box>
+                    </FormControl>
+                    {search_data.length > 0 ? (
+                      <Box
+                        sx={{
+                          width: "100%",
+                          maxWidth: 360,
+                          bgcolor: "background.paper",
+                          overflowY: "scroll",
+                          maxHeight: "350px",
+                        }}
+                      >
+                        <List
+                          sx={{
+                            width: "100%",
+                            maxWidth: 360,
+                            fontSize: "12px !important",
+                            bgcolor: "background.paper",
+                          }}
+                          component="nav"
+                          aria-labelledby="nested-list-subheader"
+                        >
+                          {search_data.map((item, i) => (
+                            <ListItemButton
+                              style={{ fontSize: "12px ", padding: "2px 10px" }}
+                              key={i}
+                              onClick={() => get_branch_id(item)}
+                            >
+                              <ListItemText
+                                secondary={
+                                  <Typography
+                                    component="span"
+                                    variant="body2"
+                                    sx={{
+                                      color: "text.primary",
+                                      display: "inline",
+                                    }}
+                                  >
+                                    {item.branch}
+                                  </Typography>
+                                }
+                              />
+                            </ListItemButton>
+                          ))}
+                        </List>
+                      </Box>
+                    ) : null}
+                  </Box>
+                </Stack>
                 <Stack spacing={2}>
                   <Controller
                     control={control}

@@ -17,6 +17,12 @@ import {
   UPDATE_BRANCH_DETAILS_REQUEST,
   UPDATE_BRANCH_DETAILS_SUCCESS,
 } from "../lib/redux/constants/branch_actionTypes";
+import {
+  FETCH_SEARCH_ERROR,
+  FETCH_SEARCH_FAILURE,
+  FETCH_SEARCH_REQUEST,
+  FETCH_SEARCH_SUCCESS,
+} from "lib/redux/constants/search_actionTypes";
 
 export const add_branch = (branch_data, uuid) => async (dispatch) => {
   try {
@@ -62,11 +68,33 @@ export const get_all_branch =
     try {
       dispatch({ type: FETCH_BRANCH_REQUEST });
       let link = `${getSiteURL()}api/v1/branch?page=${currentPage}`;
+
       const { data } = await axiosInstance.get(link, get_method());
       dispatch({ type: FETCH_BRANCH_SUCCESS, payload: data });
     } catch (error) {
       dispatch({
         type: FETCH_BRANCH_FAILURE,
+        payload: error.response.data.message,
+      });
+    }
+  };
+
+export const search_all_branch =
+  (currentPage = 1, trimmedValue = "") =>
+  async (dispatch) => {
+    try {
+      dispatch({ type: FETCH_SEARCH_REQUEST });
+      let link = `${getSiteURL()}api/v1/branch?page=${0}&keyword=${null}`;
+
+      if (trimmedValue.length > 1) {
+        link = `${getSiteURL()}api/v1/branch?page=${currentPage}&keyword=${trimmedValue}`;
+      }
+
+      const { data } = await axiosInstance.get(link, get_method());
+      dispatch({ type: FETCH_SEARCH_SUCCESS, payload: data.branch });
+    } catch (error) {
+      dispatch({
+        type: FETCH_SEARCH_FAILURE,
         payload: error.response.data.message,
       });
     }

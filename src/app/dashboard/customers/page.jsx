@@ -19,7 +19,7 @@ import {
 } from "lib/redux/constants/user_actionTypes";
 import { Alert_ } from "styles/theme/alert";
 import { CircularProgress } from "@mui/material";
-import { get_all_branch } from "api/branchapi";
+
 
 const Page = () => {
   const dispatch = useDispatch();
@@ -30,11 +30,10 @@ const Page = () => {
   const [isvisible, setIsvisible] = useState(false);
   const { loading, user, success, count_users, resultPerpage, update, error } =
     useSelector((state) => state.users);
-  const { branch } = useSelector((state) => state.branch);
+
 
   useEffect(() => {
-    dispatch(get_all_users(currentPage, "user"));
-    dispatch(get_all_branch());
+    dispatch(get_all_users(currentPage, "user",null));
   }, [dispatch, currentPage]);
 
   const columns = useMemo(
@@ -164,6 +163,7 @@ const Page = () => {
             get_data={get_all_users}
             currentPage={currentPage}
             filter_1={"user"}
+            filter_2={null}
             setOpen={setOpen}
           />
           <Button
