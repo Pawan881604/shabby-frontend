@@ -1,3 +1,4 @@
+"use client"
 import { Box, Grid, List, ListItemButton, ListItemText } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Tab_containor } from "./Tab_containor";

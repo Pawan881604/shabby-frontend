@@ -10,7 +10,7 @@ export const navItems = [
     key: "websites",
     title: "Add Sites",
     href: paths.dashboard.websites,
-    icon: "chart-pie",
+    icon: "GitBranch",
   },
   {
     key: "customers",

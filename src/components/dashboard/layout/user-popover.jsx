@@ -65,7 +65,7 @@ export function UserPopover({ anchorEl, onClose, open, custom }) {
       <Box sx={{ p: "16px 20px " }}>
         <Typography variant="subtitle1">shabby</Typography>
         <Typography color="text.secondary" variant="body2">
-          {user && user.phone_number}
+          {user.name?user.name:user.phone_number}
         </Typography>
       </Box>
       <Divider />
@@ -85,7 +85,7 @@ export function UserPopover({ anchorEl, onClose, open, custom }) {
               </ListItemIcon>
               Settings
             </MenuItem>
-            <MenuItem
+            {/* <MenuItem
               component={RouterLink}
               href={paths.dashboard.account}
               onClick={onClose}
@@ -94,7 +94,7 @@ export function UserPopover({ anchorEl, onClose, open, custom }) {
                 <UserIcon fontSize="var(--icon-fontSize-md)" />
               </ListItemIcon>
               Profile
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem onClick={handleSignOut}>
               <ListItemIcon>
                 <SignOutIcon fontSize="var(--icon-fontSize-md)" />
