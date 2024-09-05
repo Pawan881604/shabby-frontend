@@ -65,12 +65,14 @@ export const Login_user = async (email, password, uuid) => {
 
 //_________________________________________________________________
 export const get_all_users =
-  (currentPage = 1, fliter_1_user_role) =>
+  (currentPage = 1, fliter_1_user_role, fliter_1_user_type) =>
   async (dispatch) => {
     try {
       dispatch({ type: FETCH_USER_REQUEST });
       let link = `${getSiteURL()}api/v1/auth/all-users?page=${currentPage}&user.role=${fliter_1_user_role}`;
-
+      if (fliter_1_user_type) {
+        link += `&user.role=${fliter_1_user_type}`;
+      }
       const { data } = await axiosInstance.get(link, get_method());
 
       dispatch({ type: FETCH_USER_SUCCESS, payload: data });
@@ -83,9 +85,8 @@ export const get_all_users =
   };
 
 export const search_all_user =
-  (currentPage = 1, fliter_1_user_role, trimmedValue = "") =>
+  (currentPage = 1, fliter_1_user_role, trimmedValue = "", fliter_2_user_tye) =>
   async (dispatch) => {
-   
     try {
       dispatch({ type: FETCH_SEARCH_REQUEST });
       let link = `${getSiteURL()}api/v1/auth/all-users?page=${0}`;
@@ -93,9 +94,11 @@ export const search_all_user =
       if (trimmedValue.length > 1) {
         link = `${getSiteURL()}api/v1/auth/all-users?page=${currentPage}&user.role=${fliter_1_user_role}&keyword=${trimmedValue}`;
       }
-
+      if (fliter_2_user_tye) {
+        link = `${getSiteURL()}api/v1/auth/all-users?page=${currentPage}&user.role=${fliter_1_user_role}&keyword=${trimmedValue}&user.role=${fliter_2_user_tye}`;
+      }
       const { data } = await axiosInstance.get(link, get_method());
-      console.log(data)
+
       dispatch({ type: FETCH_SEARCH_SUCCESS, payload: data.users });
     } catch (error) {
       dispatch({
@@ -125,6 +128,7 @@ export const update_user = (user_data, ids, id) => async (dispatch) => {
 
 export const reset_user_password = (user_data, email) => async (dispatch) => {
   try {
+    console.log(user_data, email)
     const { password } = user_data;
     dispatch({ type: USER_PASSWORD_RESET_REQUEST });
     const { data } = await axiosInstance.put(

@@ -46,9 +46,11 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 export const Edit_users = ({ open, setOpen, isvisible }) => {
   const dispatch = useDispatch();
-  const { loading_: user_details_loading, user_details } = useSelector(
-    (state) => state.users
-  );
+  const {
+    loading_: user_details_loading,
+    success,
+    user_details,
+  } = useSelector((state) => state.users);
 
   const {
     control,
@@ -92,7 +94,14 @@ export const Edit_users = ({ open, setOpen, isvisible }) => {
       setValue("password", user_details.password || "");
       setValue("status", user_details.status || "");
     }
-  }, [setValue, user_details, dispatch, isvisible]);
+    if (success) {
+      setValue("email", "");
+      setValue("password", "");
+      setValue("name", "");
+      setValue("status", "Active");
+      setValue("role", "");
+    }
+  }, [setValue, user_details, dispatch, success, isvisible]);
   return (
     <>
       <Box>

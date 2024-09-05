@@ -31,22 +31,16 @@ export const navItems = [
     icon: "plugs-connected",
   },
   {
-    key: "settings",
-    title: "Settings",
-    href: paths.dashboard.settings,
-    icon: "gear-six",
-  },
-  {
     key: "users",
     title: "Users",
     href: paths.dashboard.users,
     icon: "users",
   },
   {
-    key: "account",
-    title: "Account",
-    href: paths.dashboard.account,
-    icon: "user",
+    key: "settings",
+    title: "Settings",
+    href: paths.dashboard.settings,
+    icon: "gear-six",
   },
   {
     key: "error",

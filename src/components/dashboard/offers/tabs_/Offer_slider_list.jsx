@@ -128,7 +128,7 @@ export const Offer_slider_list = () => {
   };
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={3}     sx={{marginBottom:'100px'}}>
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: "1 1 auto" }}>
           <Typography variant="h4">Slider List</Typography>
@@ -152,8 +152,9 @@ export const Offer_slider_list = () => {
 
       <Box
         sx={{
-          // height: "450px",
+          height: "450px",
           overflowY: "scroll",
+          marginBottom:'50px'
         }}
       >
         <Data_grid_table

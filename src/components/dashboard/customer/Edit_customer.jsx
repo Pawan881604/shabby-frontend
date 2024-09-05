@@ -29,9 +29,8 @@ import { Loadin_section } from "../../../lib/Loadin_section";
 import { useDispatch, useSelector } from "react-redux";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import { add_normal_user, clearErrors, update_user } from "api/authapi";
-import { get_all_branch, search_all_branch } from "../../../api/branchapi";
+import {  search_all_branch } from "../../../api/branchapi";
 import generateUuid from "lib/Uuidv4";
-import Search_list from "components/common/search-list/Search_list";
 
 const schema = z.object({
   phone: z
@@ -47,12 +46,9 @@ const Transition = forwardRef(function Transition(props, ref) {
 export const Edit_customer = ({ open, isvisible, setOpen }) => {
   const dispatch = useDispatch();
   const [chipData, setChipData] = useState([]);
-  const [branchData, setBranchData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-
   const { search_data } = useSelector((state) => state.search);
-
-  const { loading_: user_details_loading, user_details } = useSelector(
+  const { loading_: user_details_loading, user_details,success } = useSelector(
     (state) => state.users
   );
   const {
@@ -75,15 +71,18 @@ export const Edit_customer = ({ open, isvisible, setOpen }) => {
       setChipData([]);
     }
 
+    if (success) {
+      setValue("phone", "+91");
+      setValue("status", "Active");
+      setChipData([]);
+    }
+
     if (user_details) {
       setValue("phone", user_details.phone_number || "");
       setValue("status", user_details.status || "");
-      setChipData(
-        user_details.branch &&
-          user_details.branch
-      );
+      setChipData(user_details.branch_id && user_details.branch_id);
     }
-  }, [user_details, setValue, dispatch, isvisible]);
+  }, [user_details, setValue, dispatch,success, isvisible]);
 
   const onSubmit = async (data) => {
     const ids = chipData && chipData.map((item) => item._id);
@@ -179,36 +178,38 @@ export const Edit_customer = ({ open, isvisible, setOpen }) => {
                 </Stack>
 
                 <Stack spacing={2}>
-                  <Paper
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: "5px",
-                      listStyle: "none",
-                      maxWidth: "350px",
-                      p: 0.8,
-                    }}
-                    component="div"
-                  >
-                    {chipData &&
-                      chipData.map((data) => (
-                        <Chip
-                          key={data._id}
-                          label={data.branch}
-                          onDelete={() => handleDelete(data)}
-                        />
-                      ))}
-                  </Paper>
+                  {chipData && (
+                    <Paper
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "5px",
+                        listStyle: "none",
+                        maxWidth: "350px",
+                        p: 0.1,
+                      }}
+                      component="div"
+                    >
+                      {chipData &&
+                        chipData.map((data) => (
+                          <Chip
+                            key={data._id}
+                            label={data.branch}
+                            onDelete={() => handleDelete(data)}
+                          />
+                        ))}
+                    </Paper>
+                  )}
                   <Box sx={{ width: "100%" }}>
-                    <FormControl sx={{ marginTop: "13px", width: "100%" }}>
+                    <FormControl sx={{ marginTop: "0px", width: "100%" }}>
                       <InputLabel sx={{ top: "-6px", fontSize: "13px" }}>
-                        Search user
+                        Search Branch
                       </InputLabel>
                       <OutlinedInput
                         inputProps={{
                           style: { padding: "10px", fontSize: "12px" },
                         }}
-                        label=" Search user"
+                        label="Search Branch... "
                         type="search"
                         value={searchQuery}
                         onChange={handleInputChange}

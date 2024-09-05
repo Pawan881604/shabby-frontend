@@ -8,7 +8,7 @@ class AuthClient {
   async signInWithEmail(values, uuid) {
     const { email, password } = values;
     const authResponse = await Login_user(email, password, uuid);
-    console.log(authResponse.token);
+   
     if (authResponse.token) {
       // Store the token securely (e.g., in localStorage or a cookie)
       const cookies = new Cookies(null, {

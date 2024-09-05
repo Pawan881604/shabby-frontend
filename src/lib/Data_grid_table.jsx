@@ -94,7 +94,7 @@ export const Data_grid_table = ({
                   />}
                 </Box>
                 <Box>
-                  <Typography variant="h4">Total item {totalPages}</Typography>
+                  {/* <Typography variant="h4">Total item {totalPages}</Typography> */}
                 </Box>
               </Box>
             )}

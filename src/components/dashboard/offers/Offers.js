@@ -76,7 +76,7 @@ export const Offers = () => {
       },
       {
         accessorKey: "discription",
-        header: "Discription Url",
+        header: "Discription",
         size: 150,
       },
       {
@@ -180,7 +180,7 @@ export const Offers = () => {
             variant="contained"
             onClick={() => Show_form()}
           >
-            Add Customer
+            Add Offers
           </Button>
         </div>
       </Stack>

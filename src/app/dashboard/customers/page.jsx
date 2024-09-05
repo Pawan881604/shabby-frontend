@@ -48,7 +48,7 @@ const Page = () => {
         header: "Branch",
         size: 150,
         Cell: ({ row }) => {
-          const branchItems = row.original.branch; // Assuming params.value is an array of branch IDs
+          const branchItems = row.original.branch_id; // Assuming params.value is an array of branch IDs
           return (
             <div>
               {branchItems && branchItems.length > 0

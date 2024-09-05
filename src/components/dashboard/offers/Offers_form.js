@@ -124,17 +124,15 @@ export const Offers_form = ({ open, setOpen, isvisible }) => {
 
   const onSubmit = async (data) => {
     const ids = chipData && chipData.map((item) => item._id);
-    
-    if (!files  && !isvisible) {
+
+    if (!files && !isvisible) {
       dispatch(showAlert("Add another one image", "error"));
       return;
     }
     if (isvisible) {
       const image = files ? files : offer_details.image._id;
-      
-      dispatch(
-        update_offer(data, ids, image, offer_details._id)
-      );
+
+      dispatch(update_offer(data, ids, image, offer_details._id));
       return;
     }
     const uuid = generateUuid();
@@ -275,26 +273,28 @@ export const Offers_form = ({ open, setOpen, isvisible }) => {
                 />
               </Stack>
               <Stack spacing={2}>
-                <Paper
-                  sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "5px",
-                    listStyle: "none",
-                    maxWidth: "350px",
-                    p: 0.8,
-                  }}
-                  component="div"
-                >
-                  {search_data &&
-                    search_data.map((data) => (
-                      <Chip
-                        key={data._id}
-                        label={data.phone_number}
-                        onDelete={() => handleDelete(data)}
-                      />
-                    ))}
-                </Paper>
+                {chipData && (
+                  <Paper
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "5px",
+                      listStyle: "none",
+                      maxWidth: "350px",
+                      p: 0.8,
+                    }}
+                    component="div"
+                  >
+                    {chipData &&
+                      chipData.map((data) => (
+                        <Chip
+                          key={data._id}
+                          label={data.phone_number}
+                          onDelete={() => handleDelete(data)}
+                        />
+                      ))}
+                  </Paper>
+                )}
 
                 <Box sx={{ width: "100%" }}>
                   <FormControl sx={{ marginTop: "13px", width: "100%" }}>

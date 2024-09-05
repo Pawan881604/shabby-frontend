@@ -10,29 +10,30 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Controller, useForm } from "react-hook-form";
 import { z as zod } from "zod";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-import OtpInput from "react-otp-input";
+import {
+  Box,
+  CircularProgress,
+  InputLabel,
+  OutlinedInput,
+  Snackbar,
+} from "@mui/material";
 import { authClient } from "../../lib/auth/client";
 import { useUser } from "../../hooks/use-user";
-import { Box, InputLabel, OutlinedInput } from "@mui/material";
-import { Auth } from "../../api/authapi";
 import generateUuid from "../../lib/Uuidv4";
+
 const schema = zod.object({
-  email: zod
+  email: zod.string().min(1, { message: "Email is required" }).email(),
+  password: zod
     .string()
-    .min(1, {
-      message: "Email is required",
-    })
-    .email(),
-  password: zod.string().min(6, {
-    message: "Password should be at least 6 characters",
-  }),
+    .min(6, { message: "Password should be at least 6 characters" }),
 });
 
 export function SignInForm() {
   const router = useRouter();
+  const [auth, setauth] = React.useState(false);
   const { checkSession } = useUser();
+  const [loading, setLoading] = React.useState(false);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
 
   const {
     control,
@@ -45,25 +46,22 @@ export function SignInForm() {
 
   const onSubmit = React.useCallback(
     async (values) => {
+      setLoading(true);
+
       const uuid = await generateUuid();
       const { error } = await authClient.signInWithEmail(values, uuid);
       if (error) {
-        setError("root", {
-          type: "server",
-          message: error,
-        });
-        setIsPending(false);
+        setError("root", { type: "server", message: error });
+        setLoading(false);
         return;
       }
-
-      //   // Refresh the auth state
       await checkSession?.();
-
-      //   // UserProvider, for this case, will not refresh the router
-      //   // After refresh, GuestGuard will handle the redirect
       router.refresh();
+      setauth(true);
+      setSnackbarOpen(true);
+      setLoading(false);
     },
-    [checkSession, router, setError]
+    [checkSession, router, auth, setError]
   );
 
   return (
@@ -72,7 +70,7 @@ export function SignInForm() {
         overflow: "hidden",
         display: "flex",
         maxWidth: "400px",
-        margin: "auto auto",
+        margin: "auto",
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
@@ -178,11 +176,11 @@ export function SignInForm() {
                       <Alert color="error">{errors.root.message}</Alert>
                     )}
                     <Button
-                      // disabled={isPending}
                       type="submit"
                       variant="contained"
+                      disabled={loading}
                     >
-                      Sign in
+                      {loading ? <CircularProgress size={24} /> : "Sign in"}
                     </Button>
                   </Stack>
                 </form>
@@ -191,6 +189,22 @@ export function SignInForm() {
           </Box>
         </Box>
       </Stack>
+
+      {/* Snackbar for welcome message */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          sx={{ width: "100%", backgroundColor: "green", color: "white" }}
+        >
+          Welcome!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
