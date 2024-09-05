@@ -64,9 +64,9 @@ export function UserPopover({ anchorEl, onClose, open, custom }) {
     >
       <Box sx={{ p: "16px 20px " }}>
         <Typography variant="subtitle1">shabby</Typography>
-        <Typography color="text.secondary" variant="body2">
+        {/* <Typography color="text.secondary" variant="body2">
           {user.name?user.name:user.phone_number}
-        </Typography>
+        </Typography> */}
       </Box>
       <Divider />
       <MenuList
